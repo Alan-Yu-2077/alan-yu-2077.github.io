@@ -798,16 +798,6 @@ window.addEventListener('mousemove', e => {
   // enough (7s a revolution) that it reads as a whip-past rather than a defect,
   // and `f` refits every frame so the mark never changes size.
   const WORD = 'ALAN YU', ADV = 7, SPACE_ADV = 2, SUB = 4, ZS = 4, DEPTH = 2.1;
-  const SPIN = 2 * Math.PI / 18;            // one revolution every 18s
-  // Elevation stays shallow and constant. The word is 41 units long, so every
-  // degree of pitch sweeps its far end vertically by far more than its own cap
-  // height — a steeper tilt makes the fitted wordmark dramatically smaller.
-  const PITCH = -0.07;
-  // Deliberately no pitch wobble, though the playground's `spin` scene has one.
-  // Measured: ±2° of nod costs 13% of the fitted width (337→294px) and ±3° costs
-  // 19% (→272px, under the 291px floor where a stroke stops covering two cells).
-  // A nod small enough to afford is too small to see. Perspective buys the same
-  // solidity far cheaper — see T_D.
   // Lay the letters out along a cursor rather than on a fixed grid, so the word
   // space can be narrower than a whole letter advance — a blank cell's worth of
   // air reads as a chasm between ALAN and YU at this size.
@@ -838,13 +828,6 @@ window.addEventListener('mousemove', e => {
   // continuous range of values, and coarse steps would band the bevel
   const T_RAMP = ' ·:;=+*#%@';           // RAMP3D, verbatim from the playground
   const T_TIERS = [0.10, 0.26, 0.42, 0.60, 0.80, 1];
-  const BEVEL = 1.0;                        // how far the cap chamfers at a stroke edge
-  // Key light sits close to the view axis, so a cap facing us takes the full
-  // ink of the ramp; the chamfered edges tilt away from it and go darker. An
-  // off-axis light instead capped the flat face below maximum, which thinned
-  // every stroke by a whole ramp step.
-  const LX = -0.25, LY = -0.30, LZ = -0.92;
-  const L_AMB = -0.20, L_GAIN = 1.30;       // remap so a facing cap lands at 1.0
   // Build the slab as a surface shell with a real outward normal per voxel. A
   // flat cap lit only by "how squarely it faces the camera" is uniformly bright
   // head-on, which is exactly why the wordmark read flat at 0°; chamfering the
@@ -879,28 +862,6 @@ window.addEventListener('mousemove', e => {
   const levelFor = (idx, len) => { const p = idx / (len - 1); return p < 0.34 ? 1 : p < 0.72 ? 2 : 3; };
   const tctx = titleCanvas ? titleCanvas.getContext('2d') : null;
   let tCols = 0, tRows = 0, tW = 0, tH = 0, tAtlas = null, tZ = null, tC = null, tT = null;
-  let tF = 0;                               // focal length, fixed for the whole spin
-
-  // Projected extent of the slab's bounding box at unit focal length. The box is
-  // convex, so every voxel projects inside the hull of its eight corners.
-  function extentAt(yaw, pit) {
-    const cy_ = Math.cos(yaw), sy_ = Math.sin(yaw);
-    const cp = Math.cos(pit), sp = Math.sin(pit);
-    let xmin = 1e9, xmax = -1e9, ymin = 1e9, ymax = -1e9;
-    for (let a = -1; a <= 1; a += 2) for (let b = -1; b <= 1; b += 2) for (let c = -1; c <= 1; c += 2) {
-      const X = a * wordW / 2, Y = b * 3.5, Z = c * DEPTH / 2;
-      const x1 = X * cy_ + Z * sy_, z1 = -X * sy_ + Z * cy_;
-      const y2 = Y * cp - z1 * sp, z2 = Y * sp + z1 * cp;
-      const ooz = 1 / (T_D + z2);
-      const xx = ooz * x1, yy = ooz * y2 * T_ASP;
-      if (xx < xmin) xmin = xx; if (xx > xmax) xmax = xx;
-      if (yy < ymin) ymin = yy; if (yy > ymax) ymax = yy;
-    }
-    return { xmin, xmax, ymin, ymax };
-  }
-
-  // One size for the whole revolution: fit the *worst* angle, so the wordmark
-  // never clips and never pulses larger as it turns edge-on.
   // `spin` sizes itself every frame and centres the word in the grid, so there is
   // no focal length to solve for — but centring leaves the mark visibly indented
   // from the copy below it. Re-derive the face-on pose (its widest) from spin's

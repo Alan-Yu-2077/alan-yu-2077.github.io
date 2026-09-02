@@ -1,179 +1,149 @@
-# ALAN·YU — 个人网站（构思阶段）
+# ALAN·YU — personal site
 
-艺术方向：ASCII 码艺术，参考 [ertdfgcvb.xyz](https://ertdfgcvb.xyz/)（Andreas Gysin）。
+A static personal site, hand-written. No framework, no build step, no
+dependencies — four HTML files that open by double-clicking.
 
-## 当前内容
+Art direction is ASCII, after [ertdfgcvb.xyz](https://ertdfgcvb.xyz/)
+(Andreas Gysin). The page layout is after
+[brittanychiang.com](https://brittanychiang.com), rebuilt by hand; the
+character-rendering layers are original.
 
-- `home.html` — 主页 v1：Brittany Chiang（brittanychiang.com）布局复刻，
-  占位内容；双栏 sticky、光斑、导航指示线、行 hover 变暗等交互已齐。
-  已含 ASCII 背景层（详见下节）。
-- `index.html` — ASCII 动画 playground（11 个场景），零依赖。
-- `terminal.html` — 终端风个人站原型：命令导航 + 主题 + 彩蛋，零依赖。
-- `INSPIRATION.md` — ASCII / 终端美学资源索引（23 项，按用途分组）。
+| File | What it is |
+| --- | --- |
+| `home.html` | The site. About / Stack / Experience / Projects, plus two canvas ASCII layers. |
+| `resume.html` | One-page A4 résumé. Print to PDF straight from the browser. |
+| `index.html` | Playground: 11 realtime character-rendering scenes. |
+| `terminal.html` | The same site as a shell — commands, themes, easter eggs. |
+| `INSPIRATION.md` | Reference index: 23 ASCII / terminal-aesthetic resources, grouped by use. |
 
-双击任一 html 即可打开；本地服务器预览：`python3 -m http.server 8377`
-→ http://127.0.0.1:8377/terminal.html
+Local preview: `python3 -m http.server 8377` → <http://127.0.0.1:8377/home.html>
 
-## index.html（playground）操作
+## home.html — the two ASCII layers
 
-| 按键 / 操作 | 功能 |
-|---|---|
-| 数字键 `1`–`9` `0` 或点击菜单 | 切换场景（plasma / donut / metaballs / waves / flow / type / alan·3d / spin / orbit / morph / flag，第 11 个用 `←→` 或点击） |
-| `←` `→` | 上/下一个场景 |
-| `空格` | 暂停 |
-| `i` | 黑白反色（暗底 ↔ 纸白） |
-| 移动鼠标 | plasma / waves 中产生波纹；alan·3d 中充当"头部追踪"改变视角 |
-| 点击 | 投下一圈涟漪 |
+One behind everything, one in place of the `<h1>`. Both run at 24 fps, cost
+roughly 9% of a core together, and stop when the tab goes to the background.
 
-## 实现原理（play.core 的思路）
+### 1. Full-screen character field
 
-全屏被划分为等宽字符网格（按视口尺寸自动计算行列数）。每一帧、每个格子
-用一个关于 `(x, y, t, 鼠标)` 的函数算出一个亮度值，再映射到密度字符梯度
-（如 ` .:-=+*#%@`）——亮度完全由字形的"墨量"表达，保持纯文字的质感。
+8×11px cells tile the viewport (~15,000 of them at 1280×800) running a plasma
+built from two diagonal waves interfering with one row wave. The pointer pushes
+a ripple ahead of it; a click sends out an expanding ring.
 
-渲染用 canvas + 字形图集（glyph atlas）：每个字符按 4 档透明度预渲染成
-小贴图，逐格 `drawImage`，比逐格 `fillText` 快得多，全屏可稳定 60fps。
+It stays out of the way of the text through an **attenuation mask**: on every
+layout or scroll change the bounding boxes of the body elements are rasterised
+into a `Float32Array`, and wherever there are words the characters thin out and
+drop to 20% brightness, with a 44px feathered edge. The field reads clearly in
+the margins and all but vanishes under a paragraph.
 
-### alan·3d 场景的"裸眼3D"原理
+The plasma is separable, so `sin(a+b)` is expanded into per-row and per-column
+tables and each cell does a few lookups instead of four `sin()` calls — about
+3× faster (21% → 10.6% of a core).
 
-"ALAN" 由 5×7 点阵挤出成体素点云，透视投影 + z-buffer 渲染。三个错觉手法：
+### 2. Tumbling voxel wordmark
 
-1. **穿框**：屏幕上有一个固定在 z=0 平面的字符窗框。位于框后的物体只能
-   透过窗口看到（超出窗口范围即被裁剪），而"穿出"到框前的部分可以越过
-   边框绘制——遮挡关系由 z-buffer 自动解决。字随呼吸节奏周期性前后穿越。
-2. **头部追踪**：鼠标位置模拟观察者头部，产生离轴视差（off-axis parallax），
-   移动鼠标 = 隔窗换角度看物体。无鼠标时自动缓慢摇摆（三次方正弦，
-   在正面可读视角停留更久）。
-3. **深度线索**：近处字符更密更亮（`@#%`），远处更稀更暗（`·:;`）；
-   背景星尘位于更深的 z，随视角移动幅度更小，形成视差参照。
+`ALAN YU` is extruded from a 5×7 dot-matrix font into a voxel block
+(`SUB=4`, `ZS=4` layers, 2.1 units thick) and rendered with a perspective
+projection and a z-buffer into 4×6px character cells.
 
-### 非交互 ALAN 3D 场景（自动运行，甜甜圈式）
+The motion and camera are the playground's `spin` scene, ported over verbatim:
+three-axis tumble (yaw at 0.9 rad/s ≈ 7s a revolution, plus a pitch and a roll
+wobble on their own periods), camera at `D=24`, shading from depth alone over
+the ramp `' ·:;=+*#%@'`.
 
-- **spin** — 整词连续翻滚的旋转 logo，附轻微俯仰与滚转摆动
-- **orbit** — 四个字母站上旋转木马绕圈，近大远小、前后互相遮挡
-- **morph** — 约 3800 个粒子在球形星云与 ALAN 字形之间聚散循环
-- **flag** — 字形化作薄旗在 3D 中波动，高光带随波峰移动
+Two things that took measuring to get right:
 
-四个场景复用同一份体素点云（`ALAN` 工厂：字形挤出 + 字母归属 +
-散射目标坐标），各自只写一个不同的每帧变换函数。
+- **Cell size, not glyph size.** An earlier pass ran 5×7 cells at font 9 and
+  concluded that finer cells thin the strokes. They don't — as long as the font
+  isn't scaled down with the cell. A stroke covering 1.6 cells at 5×7 covers 2.1
+  at 4×6, and the letters read solid instead of skeletal: word 313→327px,
+  columns across the word 81→101, mean ink unchanged. But the font must still
+  *fit* the cell: at font 9 in a 4×6 cell every ramp glyph clips toward a filled
+  block and the density ramp collapses, buying spatial detail with tonal detail.
+  Font 7 keeps all ten steps distinguishable.
+- **Perspective is nearly free; nodding is not.** Pulling the camera from D=90
+  to D=55 cost 7% of the fitted width and bought 39% more near/far taper. A ±2°
+  pitch wobble, by contrast, cost 13%. The two constraints run in different
+  directions: the edge-on sweep of perspective is horizontal and the canvas is
+  86 cells wide, while a nod is vertical and it is only 18 tall.
 
-## home.html 的 ASCII 层
+`spin` centres the word in its grid, which leaves the mark visibly indented from
+the copy below it, so `fitTitle()` re-derives the face-on pose from the same
+formula and pulls the canvas left by exactly that inset.
 
-两处，一背景一标题。24fps，整层约占单核 9%，标签页切后台自动停。
+### Accessibility and fallbacks
 
-### 1. 全屏字符场（背景）
+- The `<h1>` carries the real text "Alan Yu", visually hidden, and the canvas is
+  `aria-hidden`. Screen readers, search engines and text-only modes all get the
+  name itself.
+- **Pause button** (bottom of the left column). Motion that autoplays, runs
+  longer than five seconds and sits alongside content needs a user-operable
+  pause under WCAG 2.2.2 — `prefers-reduced-motion` does not satisfy it. The
+  choice is remembered in `localStorage`.
+- The clock accumulates rather than reading absolute time, so pausing holds the
+  current pose and resuming does not jump.
 
-8×11px 字格铺满视口（1280×800 约 1.5 万格），跑一层由两道斜波 + 一道行波
-干涉出的等离子；鼠标推着一道波纹走，点击放出扩散的圆环。
+| | Effect |
+| --- | --- |
+| Pause button | Freezes in place; the choice is remembered |
+| `home.html?bg=off` | Both layers removed; the heading falls back to plain bold text |
+| `home.html?bg=static` | Frozen at `t=0`; the character field still follows the pointer |
 
-不挡信息靠的是**衰减网格**：每次布局/滚动变化时把正文元素的包围盒栅格化成一张
-`Float32Array` 遮罩，文字所在处字符变稀、亮度降到 20%，边缘 44px 羽化过渡。
-所以留白区域字符场清晰可见，段落底下几乎消失。
+Automatic degradation: `prefers-reduced-motion` freezes both layers; touch
+devices freeze only the character field (it is pointer-driven, so there is
+nothing to show without one) while **the wordmark keeps turning** — the rotation
+is the design, and phone users should still see it.
 
-性能上等离子是可分离的，用 `sin(a+b)` 展开成每行/每列的三角函数表，
-每格只做几次查表——比逐格 4 次 `sin()` 快约 3 倍（21% → 10.6% 单核）。
+## index.html — playground
 
-### 2. 旋转体素字标（h1）
+| Key / action | |
+| --- | --- |
+| `1`–`9` `0`, or click the menu | Scene (plasma / donut / metaballs / waves / flow / type / alan·3d / spin / orbit / morph / flag) |
+| `←` `→` | Previous / next scene |
+| `space` | Pause |
+| `i` | Invert (dark ground ↔ paper white) |
+| Move the pointer | Ripples in plasma / waves; head-tracking in alan·3d |
+| Click | Drop a ripple |
 
-"ALAN YU" 由 5×7 点阵字挤出成体素板（`SUB=3`、`ZS=6` 层、厚 2.2 单位），
-透视投影 + z-buffer 渲染成字符。**18 秒匀速转一整圈**，无鼠标交互。
+The whole viewport is a grid of equal-width character cells. Every frame, each
+cell computes a brightness from `(x, y, t, pointer)` and maps it onto a density
+ramp such as ` .:-=+*#%@`, so tone is carried entirely by how much ink a glyph
+has. Rendering goes through a glyph atlas — each character pre-rendered at four
+alpha tiers, then blitted per cell with `drawImage`, which is far faster than
+`fillText` per cell and holds 60fps full-screen.
 
-关键处理：
+Four of the scenes (`spin`, `orbit`, `morph`, `flag`) share one voxel point
+cloud and differ only in their per-frame transform.
 
-- **双面招牌**。板的后半用**镜像**字形构建。转到 180° 时投影本身会把 x 取负，
-  正好抵消预镜像——于是背面读作正向的 "ALAN YU"，而不是 "UY NALA"。
-  一圈里名字可读的时间因此翻倍。
-- **背向的那半板整块不绘制**（除非接近侧向，那时它是板自身的轮廓）。
-  两半互为镜像，背面永远对不齐前面的字母，留着就是错位的重影。
-- **表面壳 + 法线光照**。每个体素带真实外法线，用一盏接近视轴的主光做
-  兰伯特着色。只按"是否正对相机"打光的话，正面时整个字亮度完全一致——
-  这正是之前正对镜头 3D 感很弱的原因。完全被包裹、永远看不见的内部体素
-  直接丢弃（点数少约 40%，性能反而更好）。
-- **只在背光侧倒角**。`SUB=3` 时一根 1 像素宽的笔画只有 3 个子体素，
-  两侧都倒角会只剩 1/3 是实面，字母变成空心轮廓。现在笔画保住 2/3 满密度，
-  另一侧得到一条暗边当阴影。
-- **主光靠近视轴**（`LX/LY/LZ` + `L_AMB/L_GAIN` 重标定）。偏轴光会让正对
-  相机的平面只拿到 0.76 漫反射，映射到梯度后掉一整档墨量——所有笔画都变细。
-- **横向明暗梯度**（`grad`）。这个尺寸下每笔画不到 2 个字符格，倒角是亚格级
-  撑不住；沿整个词的受光衰减不占笔画宽度，正面也能读出"被照亮"。
-  幅度要小（0.90–1.03），大了右半个词会像褪色。
-- **`present` 因子**保留"绽放—隐没"：正面满权重、侧向降到 0.55，
-  两次侧向都不会闪成整页最亮的白板。墨量比约 13:1。
-- **字距 2 单位而非 1**。挤出的侧壁横向跨度是 `DEPTH·sin(yaw)`，
-  字母在 `atan(gap/DEPTH)` 处糊成一条连续的脊——现在 42°，原先只有 18°。
-- **词间距独立于字距**。字母沿游标排版而非固定网格，空格只推进 `SPACE_ADV`
-  而不是一整个字母的步进——否则 ALAN 与 YU 之间会空出一整格。
-  当前词距 45px / 字距 25px（约 1.8:1）。
-- **相机 D=90 做近正交投影**。字长 41 单位，D=34 时侧向瞬间近端放大 4 倍，
-  它造成的竖直扫掠会把整个字标压到只有一半大小。
-- **缩放解析求解**：初始化时扫一整圈算出投影包围盒最大值来定死焦距（转动中
-  大小恒定不忽大忽小），每帧再按当前包围盒重新居中（消除透视横向漂移）。
-- **与正文左对齐**：旋转安全余量会让正面姿态比画布边缘缩进十来像素，
-  看上去像字标相对下方文字往右缩。用 `marginLeft` 自动抵消这段缩进，
-  正面姿态与文字左边缘严格对齐（98 vs 96px）。
-- **尺寸**：桌面 430px 画布（字宽 405px，原为 490px）。字格保持 5×7 ——
-  字格大小直接决定字符的粗细，缩到 4×6 换取着色分辨率会让每个字符明显变细，
-  得不偿失。缩小与浮雕细节本身是矛盾的：浮雕要每笔画 2~3 格，
-  缩到与文字块等宽（291px）时只剩 1.6 格，所以那条路走不通，
-  改用不占笔画宽度的横向梯度来表现立体。
+## terminal.html — the site as a shell
 
-### 无障碍与回退
+Boot self-test and a dot-matrix banner, then a prompt.
 
-- `<h1>` 里有视觉隐藏的真文本 "Alan Yu"，canvas 标了 `aria-hidden`——
-  屏幕阅读器、搜索引擎、纯文本模式拿到的都是名字本身。
-- **暂停按钮**（左栏底部）。自动播放、时长超 5 秒、与正文并列的动效，
-  WCAG 2.2.2 要求提供用户可操作的暂停机制，`prefers-reduced-motion` 不算。
-  选择存 localStorage。
-- 时钟是累加式而非绝对时间：加载瞬间必定是 yaw=0（名字正对读者），
-  暂停时保持当前姿态，恢复时不会跳。
+| Command | |
+| --- | --- |
+| `help` | Command list (there are hidden ones; `ls` is a start) |
+| `about` / `projects` / `contact` | Content |
+| `theme [dark\|green\|charm\|paper]` | Four themes, persisted to `localStorage` |
+| `crt` | CRT scanlines and glow |
+| `figlet <text>` | 5×7 dot-matrix banner text (A–Z, 0–9) |
+| `play [1-11]` | Jump to a playground scene (`index.html#s=N`) |
+| `donut` / `matrix` | Full-screen easter eggs (`esc` or click to exit) |
 
-| 方式 | 效果 |
-|---|---|
-| 暂停按钮 | 保持当前姿态停住，选择被记住 |
-| `home.html?bg=off` | 整层移除，标题回落为普通粗体文字 |
-| `home.html?bg=static` | 冻结在 t=0（字标正面朝前、可读），字符场仍响应光标 |
+Tab completion for commands and arguments, `↑` `↓` history, `Ctrl+L` to clear,
+click anywhere to focus, block cursor.
 
-自动降级：`prefers-reduced-motion` → 两层都冻结；触屏设备 → 只冻结字符场
-（它靠光标驱动，没光标就没内容可显），**字标照常旋转**——旋转是设计本身，
-不该让手机用户看不到。
+## Tunables
 
-调参：字符场 `CW/CH`（字格）、`TIERS`（亮度档）、`FPS`；
-字标 `SPIN`（转速）、`PITCH`、`DEPTH`/`ZS`（板厚与层数）、`ADV`（字距）、
-`SPACE_ADV`（词距）、`T_D`（相机距离）。
+Character field — `CW`/`CH` (cell), `TIERS` (brightness steps), `FPS`.
+Wordmark — `T_CW`/`T_CH`/`T_FONT` (cell and glyph size), `T_D` (camera
+distance), `SUB`/`ZS`/`DEPTH` (voxel density and slab thickness), `ADV` /
+`SPACE_ADV` (letter and word spacing), and the yaw/pitch/roll rates in
+`drawTitle`.
+Playground — `RAMP10` and friends, `FS`/`LH`, `MARQUEE` + `GLYPHS`, `--bg`/`--fg`.
+Terminal — `FS` (fake filesystem), `CMDS` (command registry), `THEMES`, `GLYPHS`.
 
-## terminal.html — 终端站原型
+## Still to do
 
-网页即终端（灵感：terminal.shop 的完成度 + LiveTerm / satnaing 的手感清单，
-见 INSPIRATION ①-2 / ③-14·15）。开机自检 + 点阵 banner 后进入 shell：
-
-| 命令 | 功能 |
-|---|---|
-| `help` | 命令列表（还有隐藏命令，`ls` 是个开始） |
-| `about` / `projects` / `contact` | 内容占位（ASCII 框线排版） |
-| `theme [dark\|green\|charm\|paper]` | 四套主题（charm 致敬 charm.land 粉紫），localStorage 持久化 |
-| `crt` | CRT 扫描线 + 辉光开关 |
-| `figlet <text>` | 5×7 点阵大字生成（A-Z 0-9，figlet/TAAG 的极简版） |
-| `play [1-11]` | 跳转 playground 对应场景（`index.html#s=N` 深链） |
-| `donut` / `matrix` | 全屏彩蛋：a1k0n 甜甜圈 / 字符雨致敬（esc / 点击退出） |
-
-手感：Tab 补全（命令与参数）、`↑` `↓` 历史、`Ctrl+L` 清屏、点击聚焦、块状闪烁光标。
-彩蛋：`sudo`、`ssh terminal.shop`、`starwars`、`cat .secrets/…`、`exit`；
-`<title>` 本身也是对 terminal.shop 的致敬。
-
-## 可调整的地方
-
-- `index.html` 顶部：`RAMP10` 等字符梯度、`FS`/`LH` 字号行高、`MARQUEE`+`GLYPHS`
-  跑马灯文字、`--bg`/`--fg` 配色
-- `terminal.html` 顶部：`FS`（假文件系统内容）、`CMDS`（命令注册表）、
-  `THEMES` + CSS 变量（主题）、`GLYPHS`（点阵字体，已含 A-Z 0-9）
-
-## 下一步构想
-
-- [x] 定方向：复刻 Brittany Chiang 骨架（→ `home.html`），ASCII 走"细节层"融合
-- [x] 背景层 ASCII：全屏可交互字符场 + 衰减网格保证正文可读
-- [x] 字标 ASCII：ALAN YU 体素板 18 秒匀速自转
-- [ ] 细节层 ASCII：导航线/标签/分隔线字符化（克制守则见对话）
-- [ ] 换上 Departure Mono 等有性格的等宽字体（INSPIRATION ①-4）
-- [ ] 填真内容：about / experience / projects / resume 替换占位文本
-- [ ] 项目缩略图：THUMB 占位换成真实截图（或 ASCII 化预览）
-- [ ] 上线：GitHub Pages / Vercel 静态托管（纯静态文件，零构建）
+- [ ] Writing section — engineering notes drawn from Luna's per-version log
+- [ ] Real LinkedIn link (the sidebar icons are still placeholders)
+- [ ] Project thumbnails beyond the one Luna screenshot
+- [ ] Deploy (GitHub Pages / Vercel — it is already static, so there is nothing to build)
