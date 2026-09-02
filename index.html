@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALAN·YU — ASCII</title>
+<style>
+  :root{
+    --bg:#050505;
+    --fg:#e8e8e8;
+  }
+  body.inverted{
+    --bg:#f2f2f0;
+    --fg:#111111;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    overflow:hidden;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  }
+  #c{
+    position:fixed;
+    inset:0;
+    display:block;
+    cursor:crosshair;
+  }
+  header,footer{
+    position:fixed;
+    left:0; right:0;
+    padding:14px 18px;
+    font-size:12px;
+    line-height:1.7;
+    letter-spacing:.05em;
+    pointer-events:none;
+    user-select:none;
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  header{ top:0; }
+  footer{ bottom:0; }
+  #menu{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    column-gap:2px;
+  }
+  #menu span{
+    pointer-events:auto;
+    cursor:pointer;
+    padding:0 5px;
+    white-space:nowrap;
+  }
+  #menu span:hover{ text-decoration:underline; }
+  #menu span.cur{
+    background:var(--fg);
+    color:var(--bg);
+  }
+  #keys{ opacity:.55; }
+  #stat{ opacity:.55; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<header>
+  <div id="brand">ALAN·YU&nbsp;&nbsp;/&nbsp;&nbsp;ASCII PLAYGROUND</div>
+  <nav id="menu"></nav>
+</header>
+<footer>
+  <span id="stat"></span>
+  <span id="keys">[1-9 0 ←→] scene &nbsp;[space] pause &nbsp;[i] invert &nbsp;click = ripple</span>
+</footer>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------------------------------------------------------
+ * ASCII playground — in the spirit of ertdfgcvb.xyz (play.core)
+ * A fullscreen monospace cell grid; every frame each cell picks a
+ * character from a density ramp, computed from (x, y, t, mouse).
+ * --------------------------------------------------------------- */
+
+const FONT_STACK = 'ui-monospace,"SF Mono",Menlo,Monaco,Consolas,"Liberation Mono",monospace';
+const FS = 15;              // font size (px)
+const LH = 17;              // cell height (px)
+const LEVELS = [0.32, 0.52, 0.74, 1.0];   // glyph alpha tiers
+
+const RAMP10  = ' .:-=+*#%@';             // plasma / waves
+const RAMPMB  = ' ·:;+=*#@';              // metaballs
+const RAMPDON = '.,-~:;=!*#$@';           // donut (classic)
+const RAMP3D  = ' ·:;=+*#%@';             // alan·3d depth shading
+const FLOWCH  = '-/|\\';
+const TYPECH  = '#@%&';
+const CHARSET = Array.from(new Set((RAMP10 + RAMPMB + RAMPDON + RAMP3D + FLOWCH + TYPECH + '·+-|').split(''))).filter(ch => ch !== ' ');
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const statEl = document.getElementById('stat');
+const menuEl = document.getElementById('menu');
+
+let W = 0, H = 0, dpr = 1;
+let cols = 0, rows = 0, cellW = 9, cellH = LH, aspect = 0.53;
+let charGrid, levelGrid, zbuf;
+let xPos = [], yPos = [], pxC = [], pyC = [];
+let atlas = null, tileW = 0, tileH = 0, colIdx = {};
+let fg = '#e8e8e8', bg = '#050505';
+
+let t = 0, last = 0, paused = false;
+let frames = 0, fpsT = 0, fps = 0;
+const mouse = { px: -1e5, py: -1e5, inside: false };
+const ripples = [];   // {px, py, t0}
+
+/* ---------- helpers ---------- */
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const mod = (n, m) => ((n % m) + m) % m;
+const hash3 = (x, y, z) => {
+  const s = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453;
+  return s - Math.floor(s);
+};
+// smooth value noise, animated through z
+function noise(x, y, z) {
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
+  const xf = x - xi, yf = y - yi, zf = z - zi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf), w = zf * zf * (3 - 2 * zf);
+  const n = (dx, dy, dz) => hash3(xi + dx, yi + dy, zi + dz);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  return lerp(
+    lerp(lerp(n(0,0,0), n(1,0,0), u), lerp(n(0,1,0), n(1,1,0), u), v),
+    lerp(lerp(n(0,0,1), n(1,0,1), u), lerp(n(0,1,1), n(1,1,1), u), v),
+    w);
+}
+function levelFor(idx, len) {
+  const p = idx / (len - 1);
+  return p < 0.34 ? 1 : p < 0.72 ? 2 : 3;
+}
+function rippleSum(px, py, tt) {
+  let s = 0;
+  for (let i = 0; i < ripples.length; i++) {
+    const r = ripples[i], age = tt - r.t0;
+    if (age < 0 || age > 3) continue;
+    const d = Math.hypot(px - r.px, py - r.py);
+    s += Math.sin(d * 0.055 - age * 9) * Math.exp(-d / 320) * Math.exp(-age * 1.4);
+  }
+  return s;
+}
+function mouseWave(px, py, tt) {
+  if (!mouse.inside) return 0;
+  const d = Math.hypot(px - mouse.px, py - mouse.py);
+  return Math.sin(d * 0.05 - tt * 5) * Math.exp(-d / 240) * 0.9;
+}
+
+/* ---------- glyph atlas (fast per-cell drawImage) ---------- */
+function buildAtlas() {
+  tileW = Math.ceil(cellW * dpr);
+  tileH = Math.ceil(cellH * dpr);
+  atlas = document.createElement('canvas');
+  atlas.width = tileW * CHARSET.length;
+  atlas.height = tileH * LEVELS.length;
+  const a = atlas.getContext('2d');
+  a.font = (FS * dpr) + 'px ' + FONT_STACK;
+  a.textAlign = 'center';
+  a.textBaseline = 'middle';
+  colIdx = {};
+  for (let l = 0; l < LEVELS.length; l++) {
+    a.globalAlpha = LEVELS[l];
+    a.fillStyle = fg;
+    for (let i = 0; i < CHARSET.length; i++) {
+      a.fillText(CHARSET[i], i * tileW + tileW / 2, l * tileH + tileH / 2 + dpr);
+    }
+  }
+  for (let i = 0; i < CHARSET.length; i++) colIdx[CHARSET[i].charCodeAt(0)] = i;
+}
+
+/* ---------- layout ---------- */
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.font = FS + 'px ' + FONT_STACK;
+  cellW = ctx.measureText('M').width;
+  cellH = LH;
+  aspect = cellW / cellH;
+  cols = Math.max(10, Math.floor(W / cellW));
+  rows = Math.max(10, Math.floor(H / cellH));
+  const n = cols * rows;
+  charGrid = new Uint16Array(n);
+  levelGrid = new Uint8Array(n);
+  zbuf = new Float32Array(n);
+  xPos = new Array(cols); yPos = new Array(rows);
+  pxC = new Array(cols);  pyC = new Array(rows);
+  const ox = (W - cols * cellW) / 2, oy = (H - rows * cellH) / 2;
+  for (let x = 0; x < cols; x++) { xPos[x] = ox + x * cellW; pxC[x] = xPos[x] + cellW / 2; }
+  for (let y = 0; y < rows; y++) { yPos[y] = oy + y * cellH; pyC[y] = yPos[y] + cellH / 2; }
+  buildAtlas();
+}
+
+/* ---------- scenes ---------- */
+
+const SP = 32; // space char code
+
+const scenePlasma = {
+  name: 'plasma',
+  render(tt) {
+    const cx = W / 2, cy = H / 2, len = RAMP10.length;
+    for (let y = 0; y < rows; y++) {
+      const py = pyC[y], base = y * cols;
+      for (let x = 0; x < cols; x++) {
+        const px = pxC[x];
+        let v = Math.sin(x * 0.09 + tt * 0.9)
+              + Math.sin(y * 0.16 - tt * 0.62)
+              + Math.sin((x * 0.055 + y * 0.08) + tt * 0.45)
+              + Math.sin(Math.hypot(px - cx, py - cy) * 0.02 - tt * 1.4);
+        v = v / 4 + mouseWave(px, py, tt) + rippleSum(px, py, tt);
+        const idx = Math.min(len - 1, Math.max(0, Math.floor(clamp01((v + 1) / 2) * len)));
+        const ch = RAMP10[idx];
+        charGrid[base + x] = ch === ' ' ? SP : ch.charCodeAt(0);
+        levelGrid[base + x] = levelFor(idx, len);
+      }
+    }
+  }
+};
+
+const sceneDonut = {
+  name: 'donut',
+  render(tt) {
+    charGrid.fill(SP);
+    zbuf.fill(0);
+    const A = tt * 0.9, B = tt * 0.55;
+    const R1 = 1, R2 = 2, K2 = 5;
+    const scale = Math.min(cols * 0.36, rows * 0.36 / aspect);
+    const K1 = scale * K2 / (R1 + R2);
+    const cA = Math.cos(A), sA = Math.sin(A), cB = Math.cos(B), sB = Math.sin(B);
+    const cx = cols / 2, cy = rows / 2, len = RAMPDON.length;
+    for (let th = 0; th < 6.28; th += 0.07) {
+      const ct = Math.cos(th), st = Math.sin(th);
+      const circX = R2 + R1 * ct, circY = R1 * st;
+      for (let ph = 0; ph < 6.28; ph += 0.02) {
+        const cp = Math.cos(ph), sp = Math.sin(ph);
+        const x3 = circX * (cB * cp + sA * sB * sp) - circY * cA * sB;
+        const y3 = circX * (sB * cp - sA * cB * sp) + circY * cA * cB;
+        const z3 = K2 + cA * circX * sp + circY * sA;
+        const ooz = 1 / z3;
+        const xp = Math.floor(cx + K1 * ooz * x3);
+        const yp = Math.floor(cy + K1 * aspect * ooz * y3);
+        if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
+        const L = cp * ct * sB - cA * ct * sp - sA * st + cB * (cA * st - ct * sA * sp);
+        if (L <= 0) continue;
+        const i = yp * cols + xp;
+        if (ooz > zbuf[i]) {
+          zbuf[i] = ooz;
+          const idx = Math.min(len - 1, Math.floor(L * 8));
+          charGrid[i] = RAMPDON.charCodeAt(idx);
+          levelGrid[i] = levelFor(idx, len);
+        }
+      }
+    }
+  }
+};
+
+const sceneMetaballs = {
+  name: 'metaballs',
+  render(tt) {
+    const S = Math.min(W, H) / 2, cx = W / 2, cy = H / 2;
+    const balls = [];
+    for (let i = 0; i < 5; i++) {
+      const sp = 0.5 + i * 0.13, ph = i * 1.7;
+      balls.push({
+        x: Math.sin(tt * sp + ph) * 0.62 + Math.sin(tt * 0.31 + i) * 0.12,
+        y: Math.cos(tt * sp * 0.8 + ph * 1.3) * 0.5,
+        r: 0.2 + 0.06 * Math.sin(tt * 0.9 + i * 2.2)
+      });
+    }
+    const len = RAMPMB.length;
+    for (let y = 0; y < rows; y++) {
+      const ny = (pyC[y] - cy) / S, base = y * cols;
+      for (let x = 0; x < cols; x++) {
+        const nx = (pxC[x] - cx) / S;
+        let f = 0;
+        for (let b = 0; b < 5; b++) {
+          const dx = nx - balls[b].x, dy = ny - balls[b].y;
+          f += balls[b].r * balls[b].r / (dx * dx + dy * dy + 1e-6);
+        }
+        f += rippleSum(pxC[x], pyC[y], tt) * 0.35;
+        const idx = Math.min(len - 1, Math.max(0, Math.floor((f - 0.55) * 1.35 * len)));
+        const ch = RAMPMB[idx];
+        charGrid[base + x] = ch === ' ' ? SP : ch.charCodeAt(0);
+        levelGrid[base + x] = levelFor(idx, len);
+      }
+    }
+  }
+};
+
+const sceneWaves = {
+  name: 'waves',
+  render(tt) {
+    const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.38;
+    const srcs = [];
+    for (let i = 0; i < 3; i++) {
+      srcs.push({
+        x: cx + Math.sin(tt * (0.21 + i * 0.07) + i * 2.1) * R,
+        y: cy + Math.cos(tt * (0.17 + i * 0.05) + i * 1.3) * R * 0.8
+      });
+    }
+    const len = RAMP10.length;
+    for (let y = 0; y < rows; y++) {
+      const py = pyC[y], base = y * cols;
+      for (let x = 0; x < cols; x++) {
+        const px = pxC[x];
+        let v = 0;
+        for (let s = 0; s < 3; s++) {
+          v += Math.sin(Math.hypot(px - srcs[s].x, py - srcs[s].y) * 0.045 - tt * 2.2 + s * 2.1);
+        }
+        v = v / 3 + mouseWave(px, py, tt) * 1.2 + rippleSum(px, py, tt) * 1.5;
+        const idx = Math.min(len - 1, Math.max(0, Math.floor(clamp01((v + 1) / 2) * len)));
+        const ch = RAMP10[idx];
+        charGrid[base + x] = ch === ' ' ? SP : ch.charCodeAt(0);
+        levelGrid[base + x] = levelFor(idx, len);
+      }
+    }
+  }
+};
+
+const sceneFlow = {
+  name: 'flow',
+  render(tt) {
+    for (let y = 0; y < rows; y++) {
+      const base = y * cols;
+      for (let x = 0; x < cols; x++) {
+        const n = noise(x * 0.085, y * 0.17, tt * 0.22);
+        const m = noise(x * 0.05 + 40, y * 0.1 + 40, tt * 0.13);
+        if (m < 0.34) {
+          // sparse dust in calm regions
+          if (hash3(x, y, 7) > 0.965) { charGrid[base + x] = 183; levelGrid[base + x] = 1; } // '·'
+          else charGrid[base + x] = SP;
+          continue;
+        }
+        const sector = Math.round(n * 8) % 4;
+        charGrid[base + x] = FLOWCH.charCodeAt(sector);
+        levelGrid[base + x] = m < 0.5 ? 1 : m < 0.68 ? 2 : 3;
+      }
+    }
+  }
+};
+
+// 5x7 bitmap font for the marquee scene
+const GLYPHS = {
+  'A': ['01110','10001','10001','11111','10001','10001','10001'],
+  'L': ['10000','10000','10000','10000','10000','10000','11111'],
+  'N': ['10001','11001','11001','10101','10011','10011','10001'],
+  'Y': ['10001','10001','01010','00100','00100','00100','00100'],
+  'U': ['10001','10001','10001','10001','10001','10001','01110'],
+  '·': ['00000','00000','00000','00100','00000','00000','00000'],
+};
+const MARQUEE = 'ALAN·YU·';
+
+const sceneType = {
+  name: 'type',
+  render(tt) {
+    // SX/SY: cells per font pixel — chosen so pixels come out roughly square
+    const SY = 2, SX = Math.max(1, Math.round(SY * cellH / cellW * 0.95));
+    const GAP = 6, letterRows = 7 * SY, bandH = letterRows + GAP;
+    const texCols = MARQUEE.length * 6 * SX;
+    const shimmer = Math.floor(tt * 8);
+    for (let y = 0; y < rows; y++) {
+      const band = Math.floor(y / bandH), yin = y - band * bandH, base = y * cols;
+      const inLetter = yin < letterRows;
+      const ty = Math.floor(yin / SY);
+      const dir = band % 2 ? 1 : -1;
+      const off = dir * Math.floor(tt * 11) + band * 7;
+      for (let x = 0; x < cols; x++) {
+        let on = false;
+        if (inLetter) {
+          const txx = mod(x + off, texCols);
+          const fc = Math.floor(txx / SX);
+          const li = Math.floor(fc / 6), pxx = fc % 6;
+          if (pxx < 5) {
+            const g = GLYPHS[MARQUEE[li]];
+            on = g && g[ty][pxx] === '1';
+          }
+        }
+        if (on) {
+          charGrid[base + x] = TYPECH.charCodeAt(Math.floor(hash3(x, y, shimmer) * TYPECH.length));
+          levelGrid[base + x] = 3;
+        } else if (x % 7 === 0 && y % 3 === 0) {
+          charGrid[base + x] = 183; levelGrid[base + x] = 0; // faint '·' lattice
+        } else {
+          charGrid[base + x] = SP;
+        }
+      }
+    }
+  }
+};
+
+/* "naked-eye 3D": extruded ALAN voxel text behind a screen-fixed window
+ * frame at z=0. Mouse acts as head-tracking (off-axis parallax); the word
+ * periodically pushes through the frame, and the z-buffer resolves the
+ * occlusion either way. Depth is also cued by ramp density + glyph alpha. */
+/* shared voxel cloud for all ALAN 3D scenes: 5×7 glyphs extruded in z.
+ * Each point carries: model position, letter index li, letter-local lx,
+ * a deterministic seed, and a scatter-sphere target (for morph). */
+const ALAN = (() => {
+  const WORD = 'ALAN';
+  const SUB = 4, ZS = 4, DEPTH = 2.1;
+  const ADV = 7, YS = 1.28;                 // letter advance, vertical stretch
+  const wordW = WORD.length * ADV - (ADV - 5);
+  const pts = [];
+  for (let li = 0; li < WORD.length; li++) {
+    const g = GLYPHS[WORD[li]];
+    for (let py = 0; py < 7; py++) for (let px = 0; px < 5; px++) {
+      if (g[py][px] !== '1') continue;
+      for (let sy = 0; sy < SUB; sy++) for (let sx = 0; sx < SUB; sx++) for (let zi = 0; zi < ZS; zi++) {
+        const i = pts.length;
+        const u = hash3(i, 3.7, 1), u2 = hash3(i, 9.1, 2), w = hash3(i, 5.3, 3);
+        const rr = 6.5 + 4.5 * u, th = u2 * 6.283, sph = Math.acos(2 * w - 1);
+        const x = li * ADV + px + (sx + 0.5) / SUB - wordW / 2;
+        pts.push({
+          x,
+          y: (py + (sy + 0.5) / SUB - 3.5) * YS,
+          z: (zi / (ZS - 1) - 0.5) * DEPTH,
+          s0: zi === 0 ? 1 : zi === ZS - 1 ? 0.45 : 0.6,  // front face brightest
+          li,
+          lx: x - (li * ADV + 2 - wordW / 2),
+          seed: hash3(i, 0.713, 7),
+          sx: rr * Math.sin(sph) * Math.cos(th),
+          sy: rr * Math.cos(sph) * 0.8,
+          sz: rr * Math.sin(sph) * Math.sin(th)
+        });
+      }
+    }
+  }
+  return { pts, wordW, YS };
+})();
+
+const sceneAlan3D = (() => {
+  const pts = ALAN.pts, wordW = ALAN.wordW, YS = ALAN.YS;
+  const dust = [];
+  for (let i = 0; i < 140; i++) {
+    dust.push({
+      x: (hash3(i, 1, 0) - 0.5) * wordW * 1.7,
+      y: (hash3(i, 2, 0) - 0.5) * 14,
+      z: 5 + hash3(i, 3, 0) * 14
+    });
+  }
+  let vx = 0, vy = 0, lastT = 0;
+  return {
+    name: 'alan·3d',
+    render(tt) {
+      const dt = Math.min(0.1, tt - lastT) || 0.016; lastT = tt;
+      const D = 24;
+      // view target: mouse = head position, else slow automatic sway
+      // (cubed sine dwells near the readable head-on view, swings out briefly)
+      const sw = Math.sin(tt * 0.42);
+      const autoYaw = sw * sw * sw * 0.42, autoPitch = Math.sin(tt * 0.3) * 0.10 - 0.05;
+      const txv = mouse.inside ? (mouse.px / W - 0.5) * 1.1 + autoYaw * 0.25 : autoYaw;
+      const tyv = mouse.inside ? (mouse.py / H - 0.5) * 0.6 + autoPitch * 0.25 : autoPitch;
+      const k = Math.min(1, dt * 7);
+      vx += (txv - vx) * k; vy += (tyv - vy) * k;
+      const cyw = Math.cos(vx), syw = Math.sin(vx);
+      const cpt = Math.cos(vy), spt = Math.sin(vy);
+      const Z0 = 2.4 + Math.sin(tt * 0.26) * 1.5;   // breathing: pushes through the frame
+      const bobY = Math.sin(tt * 0.8) * 0.3;
+      const f = Math.min(cols * 0.78 / wordW, rows * 0.6 / (7 * YS * aspect)) * D;
+      const ccx = cols / 2, ccy = rows / 2;
+      charGrid.fill(SP); zbuf.fill(0);
+      // window frame, fixed to the screen at z=0
+      const fx0 = Math.round(cols * 0.10), fx1 = cols - 1 - fx0;
+      const fy0 = Math.round(rows * 0.12), fy1 = rows - 1 - fy0;
+      const oozF = 1 / D;
+      const putF = (xx, yy, code) => {
+        const i = yy * cols + xx;
+        if (oozF > zbuf[i]) { zbuf[i] = oozF; charGrid[i] = code; levelGrid[i] = 1; }
+      };
+      for (let x = fx0; x <= fx1; x++) { putF(x, fy0, 45); putF(x, fy1, 45); }
+      for (let y = fy0 + 1; y < fy1; y++) { putF(fx0, y, 124); putF(fx1, y, 124); }
+      putF(fx0, fy0, 43); putF(fx1, fy0, 43); putF(fx0, fy1, 43); putF(fx1, fy1, 43);
+      const plot = (mx, my, mz, s0, code) => {
+        const x1 = mx * cyw + mz * syw, z1 = -mx * syw + mz * cyw;
+        const y2 = my * cpt - z1 * spt, z2 = my * spt + z1 * cpt + Z0;
+        const zc = D + z2;
+        if (zc < 4) return;
+        const ooz = 1 / zc;
+        const xp = Math.round(ccx + f * ooz * x1);
+        const yp = Math.round(ccy + f * aspect * ooz * y2);
+        if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) return;
+        // behind the frame plane you only see through the window;
+        // popped-out points (z2 < 0) may overflow the frame
+        if (z2 > 0 && (xp <= fx0 || xp >= fx1 || yp <= fy0 || yp >= fy1)) return;
+        const i = yp * cols + xp;
+        if (ooz <= zbuf[i]) return;
+        zbuf[i] = ooz;
+        if (code) { charGrid[i] = code; levelGrid[i] = z2 > 6 ? 0 : 1; return; }
+        const near = clamp01(0.5 - z2 / 14);
+        const v = s0 * (0.45 + 0.75 * near);
+        const idx = Math.max(1, Math.min(RAMP3D.length - 1, Math.floor(v * RAMP3D.length)));
+        charGrid[i] = RAMP3D.charCodeAt(idx);
+        levelGrid[i] = levelFor(idx, RAMP3D.length);
+      };
+      for (let i = 0; i < dust.length; i++) plot(dust[i].x, dust[i].y, dust[i].z, 0, 183);
+      for (let i = 0; i < pts.length; i++) plot(pts[i].x, pts[i].y + bobY, pts[i].z, pts[i].s0, 0);
+    }
+  };
+})();
+
+/* non-interactive ALAN 3D variants — self-running, donut-style */
+
+// whole word tumbling continuously (classic demoscene logo spin)
+const sceneSpin = {
+  name: 'spin',
+  render(tt) {
+    const pts = ALAN.pts, wordW = ALAN.wordW, YS = ALAN.YS;
+    const D = 24, Z0 = 2.5, len = RAMP3D.length;
+    const yaw = tt * 0.9, pit = Math.sin(tt * 0.37) * 0.16 - 0.04, rol = Math.sin(tt * 0.23) * 0.06;
+    const cyw = Math.cos(yaw), syw = Math.sin(yaw);
+    const cpt = Math.cos(pit), spt = Math.sin(pit);
+    const crl = Math.cos(rol), srl = Math.sin(rol);
+    const f = Math.min(cols * 0.8 / wordW, rows * 0.6 / (7 * YS * aspect)) * D;
+    const ccx = cols / 2, ccy = rows / 2;
+    charGrid.fill(SP); zbuf.fill(0);
+    for (let n = 0; n < pts.length; n++) {
+      const p = pts[n];
+      const X = p.x * crl - p.y * srl, Y = p.x * srl + p.y * crl;
+      const X2 = X * cyw + p.z * syw, Z2 = -X * syw + p.z * cyw;
+      const Y2 = Y * cpt - Z2 * spt, Z3 = Y * spt + Z2 * cpt + Z0;
+      const zc = D + Z3;
+      if (zc < 4) continue;
+      const ooz = 1 / zc;
+      const xp = Math.round(ccx + f * ooz * X2);
+      const yp = Math.round(ccy + f * aspect * ooz * Y2);
+      if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
+      const gi = yp * cols + xp;
+      if (ooz <= zbuf[gi]) continue;
+      zbuf[gi] = ooz;
+      const near = clamp01(0.5 - Z3 / 14);
+      const v = p.s0 * (0.4 + 0.8 * near);
+      const idx = Math.max(1, Math.min(len - 1, Math.floor(v * len)));
+      charGrid[gi] = RAMP3D.charCodeAt(idx);
+      levelGrid[gi] = levelFor(idx, len);
+    }
+  }
+};
+
+// four letters riding a rotating carousel, occluding each other
+const sceneOrbit = {
+  name: 'orbit',
+  render(tt) {
+    const pts = ALAN.pts, YS = ALAN.YS;
+    const D = 24, R = 9.5, Z0 = 4.5, len = RAMP3D.length;
+    const pit = -0.16 + Math.sin(tt * 0.19) * 0.05;
+    const cpt = Math.cos(pit), spt = Math.sin(pit);
+    const c4 = [], s4 = [];
+    for (let li = 0; li < 4; li++) {
+      const th = -tt * 0.65 + li * (Math.PI / 2);
+      c4.push(Math.cos(th)); s4.push(Math.sin(th));
+    }
+    const span = 2 * R + 7;
+    const f = Math.min(cols * 0.72 / span, rows * 0.55 / (7 * YS * aspect)) * D;
+    const ccx = cols / 2, ccy = rows / 2;
+    charGrid.fill(SP); zbuf.fill(0);
+    for (let n = 0; n < pts.length; n++) {
+      const p = pts[n];
+      const cth = c4[p.li], sth = s4[p.li];
+      const zl = p.z * 0.8;
+      const X = p.lx * cth + zl * sth + R * sth;
+      const Z = -p.lx * sth + zl * cth - R * cth;
+      const Y2 = p.y * cpt - Z * spt, Z3 = p.y * spt + Z * cpt + Z0;
+      const zc = D + Z3;
+      if (zc < 4) continue;
+      const ooz = 1 / zc;
+      const xp = Math.round(ccx + f * ooz * X);
+      const yp = Math.round(ccy + f * aspect * ooz * Y2);
+      if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
+      const gi = yp * cols + xp;
+      if (ooz <= zbuf[gi]) continue;
+      zbuf[gi] = ooz;
+      const near = clamp01(0.5 - Z3 / 16);
+      const v = p.s0 * (0.38 + 0.85 * near);
+      const idx = Math.max(1, Math.min(len - 1, Math.floor(v * len)));
+      charGrid[gi] = RAMP3D.charCodeAt(idx);
+      levelGrid[gi] = levelFor(idx, len);
+    }
+  }
+};
+
+// particles swirl as a nebula, then assemble into ALAN, then release
+const sceneMorph = {
+  name: 'morph',
+  render(tt) {
+    const pts = ALAN.pts, wordW = ALAN.wordW, YS = ALAN.YS;
+    const D = 24, Z0 = 2.5, len = RAMP3D.length;
+    const sgn = Math.sin(tt * 0.4);
+    const p01 = clamp01(sgn * 1.4 + 0.6);          // dwell assembled ~40% of cycle
+    const e = p01 * p01 * (3 - 2 * p01);
+    const yaw = Math.sin(tt * 0.35) * 0.45;
+    const cyw = Math.cos(yaw), syw = Math.sin(yaw);
+    const pit = -0.05 + Math.sin(tt * 0.27) * 0.08;
+    const cpt = Math.cos(pit), spt = Math.sin(pit);
+    const swt = tt * 0.35;
+    const csw = Math.cos(swt), ssw = Math.sin(swt);
+    const f = Math.min(cols * 0.75 / wordW, rows * 0.58 / (7 * YS * aspect)) * D;
+    const ccx = cols / 2, ccy = rows / 2;
+    charGrid.fill(SP); zbuf.fill(0);
+    for (let n = 0; n < pts.length; n++) {
+      const p = pts[n];
+      const sx2 = p.sx * csw + p.sz * ssw, sz2 = -p.sx * ssw + p.sz * csw;
+      const sy2 = p.sy + Math.sin(tt * 0.9 + p.seed * 6.28) * 0.6;
+      const mx = sx2 + (p.x - sx2) * e;
+      const my = sy2 + (p.y - sy2) * e;
+      const mz = sz2 + (p.z - sz2) * e;
+      const X2 = mx * cyw + mz * syw, Z2 = -mx * syw + mz * cyw;
+      const Y2 = my * cpt - Z2 * spt, Z3 = my * spt + Z2 * cpt + Z0;
+      const zc = D + Z3;
+      if (zc < 4) continue;
+      const ooz = 1 / zc;
+      const xp = Math.round(ccx + f * ooz * X2);
+      const yp = Math.round(ccy + f * aspect * ooz * Y2);
+      if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
+      const gi = yp * cols + xp;
+      if (ooz <= zbuf[gi]) continue;
+      zbuf[gi] = ooz;
+      const near = clamp01(0.5 - Z3 / 14);
+      const v = p.s0 * (0.42 + 0.75 * near) * (0.5 + 0.5 * e) + (1 - e) * 0.12;
+      const idx = Math.max(1, Math.min(len - 1, Math.floor(v * len)));
+      charGrid[gi] = RAMP3D.charCodeAt(idx);
+      levelGrid[gi] = levelFor(idx, len);
+    }
+  }
+};
+
+// the word as a cloth banner rippling in 3D, highlights riding the wave
+const sceneFlag = {
+  name: 'flag',
+  render(tt) {
+    const pts = ALAN.pts, wordW = ALAN.wordW, YS = ALAN.YS;
+    const D = 24, Z0 = 2.2, len = RAMP3D.length;
+    const yaw = -0.12 + Math.sin(tt * 0.3) * 0.3;
+    const pit = -0.06 + Math.sin(tt * 0.21) * 0.06;
+    const cyw = Math.cos(yaw), syw = Math.sin(yaw);
+    const cpt = Math.cos(pit), spt = Math.sin(pit);
+    const f = Math.min(cols * 0.78 / wordW, rows * 0.58 / (7 * YS * aspect)) * D;
+    const ccx = cols / 2, ccy = rows / 2;
+    charGrid.fill(SP); zbuf.fill(0);
+    for (let n = 0; n < pts.length; n++) {
+      const p = pts[n];
+      const ph = p.x * 0.42 + tt * 2.1;
+      const sw = Math.sin(ph), cw = Math.cos(ph);
+      const zw = p.z * 0.35 + sw * 1.5;
+      const yw = p.y + cw * 0.22;
+      const X2 = p.x * cyw + zw * syw, Z2 = -p.x * syw + zw * cyw;
+      const Y2 = yw * cpt - Z2 * spt, Z3 = yw * spt + Z2 * cpt + Z0;
+      const zc = D + Z3;
+      if (zc < 4) continue;
+      const ooz = 1 / zc;
+      const xp = Math.round(ccx + f * ooz * X2);
+      const yp = Math.round(ccy + f * aspect * ooz * Y2);
+      if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
+      const gi = yp * cols + xp;
+      if (ooz <= zbuf[gi]) continue;
+      zbuf[gi] = ooz;
+      const near = clamp01(0.5 - Z3 / 14);
+      const v = (0.5 + 0.5 * p.s0) * (0.42 + 0.65 * near) + cw * 0.15;
+      const idx = Math.max(1, Math.min(len - 1, Math.floor(v * len)));
+      charGrid[gi] = RAMP3D.charCodeAt(idx);
+      levelGrid[gi] = levelFor(idx, len);
+    }
+  }
+};
+
+const scenes = [scenePlasma, sceneDonut, sceneMetaballs, sceneWaves, sceneFlow, sceneType,
+                sceneAlan3D, sceneSpin, sceneOrbit, sceneMorph, sceneFlag];
+let cur = 0;
+
+/* ---------- menu ---------- */
+function buildMenu() {
+  menuEl.innerHTML = '';
+  scenes.forEach((s, i) => {
+    const el = document.createElement('span');
+    const key = i < 9 ? String(i + 1) : i === 9 ? '0' : '→';
+    el.textContent = '[' + key + '] ' + s.name;
+    el.className = i === cur ? 'cur' : '';
+    el.addEventListener('click', () => setScene(i));
+    menuEl.appendChild(el);
+  });
+}
+function setScene(i) {
+  cur = mod(i, scenes.length);
+  [...menuEl.children].forEach((el, k) => el.className = k === cur ? 'cur' : '');
+}
+
+/* ---------- render ---------- */
+function draw() {
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  const dw = tileW / dpr, dh = tileH / dpr;
+  for (let y = 0; y < rows; y++) {
+    const base = y * cols, yy = yPos[y];
+    for (let x = 0; x < cols; x++) {
+      const code = charGrid[base + x];
+      if (code === SP || code === 0) continue;
+      const col = colIdx[code];
+      if (col === undefined) continue;
+      ctx.drawImage(atlas, col * tileW, levelGrid[base + x] * tileH, tileW, tileH, xPos[x], yy, dw, dh);
+    }
+  }
+}
+
+function frame(now) {
+  if (now - last < 12) return;   // debounce: rAF + interval fallback both drive this
+  const dt = Math.min(0.1, (now - last) / 1000) || 0;
+  last = now;
+  if (!paused) t += dt;
+  scenes[cur].render(t);
+  draw();
+  frames++;
+  if (now - fpsT > 500) {
+    fps = Math.round(frames * 1000 / (now - fpsT));
+    frames = 0; fpsT = now;
+    statEl.textContent = cols + '×' + rows + ' · ' + fps + 'fps · t ' + t.toFixed(1) + 's' + (paused ? ' · paused' : '');
+  }
+}
+function rafLoop(now) {
+  frame(now);
+  requestAnimationFrame(rafLoop);
+}
+
+/* ---------- input ---------- */
+window.addEventListener('resize', resize);
+window.addEventListener('keydown', e => {
+  if (/^[0-9]$/.test(e.key)) {
+    const idx = e.key === '0' ? 9 : +e.key - 1;
+    if (idx < scenes.length) setScene(idx);
+  }
+  else if (e.key === 'ArrowRight') setScene(cur + 1);
+  else if (e.key === 'ArrowLeft') setScene(cur - 1);
+  else if (e.key === ' ') { paused = !paused; e.preventDefault(); }
+  else if (e.key === 'i' || e.key === 'I') {
+    document.body.classList.toggle('inverted');
+    const cs = getComputedStyle(document.body);
+    bg = cs.getPropertyValue('--bg').trim();
+    fg = cs.getPropertyValue('--fg').trim();
+    buildAtlas();
+  }
+});
+canvas.addEventListener('mousemove', e => {
+  mouse.px = e.clientX; mouse.py = e.clientY; mouse.inside = true;
+});
+canvas.addEventListener('mouseleave', () => { mouse.inside = false; });
+canvas.addEventListener('mousedown', e => {
+  ripples.push({ px: e.clientX, py: e.clientY, t0: t });
+  if (ripples.length > 8) ripples.shift();
+});
+
+/* ---------- go ---------- */
+const cs = getComputedStyle(document.body);
+bg = cs.getPropertyValue('--bg').trim();
+fg = cs.getPropertyValue('--fg').trim();
+resize();
+buildMenu();
+// deep link from terminal.html: index.html#s=7 → scene 7 (1-based)
+const hashScene = location.hash.match(/s=(\d+)/);
+if (hashScene) setScene(Math.min(scenes.length - 1, Math.max(0, +hashScene[1] - 1)));
+requestAnimationFrame(rafLoop);
+// fallback driver: keeps the animation alive where rAF is throttled (hidden tabs, embeds)
+setInterval(() => frame(performance.now()), 33);
+// tiny debug hook (used for automated screenshots; harmless in normal use)
+window.__ascii = {
+  setScene,
+  advance(sec) { t += sec; scenes[cur].render(t); draw(); }
+};
+
+})();
+</script>
+</body>
+</html>

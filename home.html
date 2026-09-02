@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alan Yu</title>
+<meta name="description" content="Alan Yu — Agent Infrastructure Engineer. Runtimes, schedulers and sandboxes for LLM agents. Seeking a 2026 internship in Paris.">
+<!-- Layout after brittanychiang.com (Brittany Chiang), rebuilt by hand.
+     No framework, no build step, no dependencies. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f172a;            /* slate-900 */
+    --text:#94a3b8;          /* slate-400 */
+    --head:#e2e8f0;          /* slate-200 */
+    --dim:#64748b;           /* slate-500 */
+    --line:#475569;          /* slate-600 */
+    --accent:#5eead4;        /* teal-300 */
+    --pill-bg:rgba(45,212,191,.1);
+    --hover-bg:rgba(30,41,59,.5);   /* slate-800/50 */
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:16px;
+    line-height:1.625;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent); color:var(--bg); }
+  a{ color:inherit; text-decoration:none; }
+  ul,ol{ list-style:none; margin:0; padding:0; }
+  h1,h2,h3,p{ margin:0; }
+  svg{ display:block; }
+
+  a:focus-visible,button:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+  .skip{
+    position:absolute; left:-9999px; top:auto;
+    background:var(--accent); color:var(--bg);
+    padding:12px 20px; font-weight:600; z-index:100;
+  }
+  .skip:focus{ left:16px; top:16px; }
+
+  /* mouse spotlight */
+  #spot{
+    position:fixed; inset:0; z-index:30;
+    pointer-events:none;
+    transition:background .3s;
+    background:radial-gradient(600px circle at 50% 15%, rgba(29,78,216,.15), transparent 80%);
+  }
+  @media (prefers-reduced-motion: reduce){ #spot{ transition:none; } }
+
+  /* full-bleed ascii character field */
+  #bgfx{
+    position:fixed; inset:0; z-index:0;
+    pointer-events:none;
+  }
+
+  /* voxel-extruded ascii wordmark, replaces the h1 text when JS is up */
+  .sr-only{
+    position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+  }
+  /* On desktop the wordmark is sized to the text block beneath it (~292px), so it
+     shares that block's left edge AND its optical centre. Full column width made
+     it overhang the copy by 200px and read as right-heavy. */
+  #titlefx{ display:none; width:100%; max-width:430px; height:105px; }
+  @media (min-width:640px){ #titlefx{ max-width:430px; height:130px; } }
+  h1.has-fx .txt{
+    position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
+  }
+  h1.has-fx a{ display:block; }
+  h1.has-fx #titlefx{ display:block; }
+
+  .container{
+    position:relative; z-index:1;
+    max-width:1280px;
+    margin:0 auto;
+    padding:48px 24px;
+  }
+  @media (min-width:768px){ .container{ padding:64px 48px; } }
+  @media (min-width:1024px){ .container{ padding:0 96px; } }
+
+  @media (min-width:1024px){
+    .layout{ display:flex; justify-content:space-between; gap:16px; }
+    header{
+      position:sticky; top:0;
+      display:flex; flex-direction:column; justify-content:space-between;
+      max-height:100vh; width:48%;
+      padding:96px 0;
+    }
+    main{ width:52%; padding:96px 0; }
+  }
+
+  /* ---------- left column ---------- */
+  h1{
+    font-size:36px; font-weight:700; letter-spacing:-.025em;
+    color:var(--head); line-height:1;
+  }
+  @media (min-width:640px){ h1{ font-size:48px; } }
+  h1 a:hover{ color:var(--head); }
+  .role{
+    margin-top:12px;
+    font-size:18px; font-weight:500; color:var(--head);
+    line-height:1.3;
+  }
+  @media (min-width:640px){ .role{ font-size:20px; } }
+  .tagline{ margin-top:16px; max-width:20rem; }
+  /* The one line a Paris recruiter needs to act on: city, language, and the
+     paperwork question that otherwise kills a foreign application on sight. */
+  .avail{
+    margin-top:16px; max-width:20rem;
+    font-size:13px; line-height:1.5; color:var(--dim);
+    border-left:2px solid var(--accent); padding-left:12px;
+  }
+  .avail strong{ color:var(--accent); font-weight:600; }
+
+  nav.side{ display:none; }
+  @media (min-width:1024px){ nav.side{ display:block; margin-top:64px; width:max-content; } }
+  .navlink{
+    display:flex; align-items:center; padding:12px 0;
+  }
+  .navlink .ind{
+    width:32px; height:1px; background:var(--line);
+    margin-right:16px;
+    transition:width .2s, background-color .2s;
+  }
+  .navlink .navtext{
+    font-size:12px; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase;
+    color:var(--dim);
+    transition:color .2s;
+  }
+  .navlink:hover .ind, .navlink.active .ind{ width:64px; background:var(--head); }
+  .navlink:hover .navtext, .navlink.active .navtext{ color:var(--head); }
+
+  .socials{
+    display:flex; align-items:center; gap:20px;
+    margin-top:32px;
+  }
+  .socials a{ color:var(--text); transition:color .2s; }
+  .socials a:hover{ color:var(--head); }
+  .socials svg{ width:24px; height:24px; }
+
+  .foot-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:20px; flex-wrap:wrap;
+  }
+  .foot-row .socials{ margin-top:32px; }
+  #motion{
+    margin-top:32px;
+    background:none; border:0; padding:4px 0;
+    font:inherit; font-size:11px;
+    letter-spacing:.08em; text-transform:uppercase;
+    color:var(--dim); cursor:pointer;
+    transition:color .2s;
+  }
+  #motion:hover{ color:var(--head); }
+
+  /* ---------- right column ---------- */
+  section{ margin-bottom:64px; scroll-margin-top:64px; }
+  @media (min-width:768px){ section{ margin-bottom:96px; } }
+  @media (min-width:1024px){ section{ margin-bottom:144px; scroll-margin-top:96px; } }
+
+  .sticky-head{
+    position:sticky; top:0; z-index:20;
+    margin:0 -24px; padding:20px 24px;
+    background:rgba(15,23,42,.75);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  }
+  @media (min-width:768px){ .sticky-head{ margin:0 -48px; padding:20px 48px; } }
+  @media (min-width:1024px){
+    .sticky-head{
+      position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+      overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;   /* sr-only on desktop */
+    }
+  }
+  .sticky-head h3{
+    font-size:14px; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase;
+    color:var(--head);
+  }
+  .section-body{ margin-top:16px; }
+  @media (min-width:1024px){ .section-body{ margin-top:0; } }
+
+  #about p + p{ margin-top:16px; }
+  .hl{ color:var(--head); font-weight:500; transition:color .2s; }
+  a.hl:hover{ color:var(--accent); }
+  code{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:.86em; color:var(--accent);
+    background:var(--pill-bg); padding:1px 5px; border-radius:4px;
+  }
+
+  /* stack: three focus areas, each a claim with its own evidence below */
+  .stack{ margin:0; }
+  .stack .grp + .grp{ margin-top:28px; }
+  .stack dt{
+    font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--head); margin-bottom:8px;
+  }
+  .stack dd{ margin:0; font-size:14px; line-height:1.6; }
+  .stack .also{
+    margin-top:32px; padding-top:20px; border-top:1px solid rgba(148,163,184,.14);
+    font-size:13px; color:var(--dim);
+  }
+  .stack .also + .also{ margin-top:12px; padding-top:0; border-top:0; }
+  .stack .also strong{ color:var(--text); font-weight:600; }
+
+  /* rows (experience & projects) */
+  .rows > li + li{ margin-top:48px; }
+  .row{ position:relative; display:grid; gap:8px; }
+  @media (min-width:640px){
+    .row{ grid-template-columns:repeat(8,1fr); gap:32px 32px; row-gap:8px; }
+  }
+  .row::before{
+    content:""; position:absolute; inset:-16px -24px;
+    border-radius:8px; z-index:0;
+    transition:background-color .2s, box-shadow .2s;
+  }
+  @media (min-width:1024px){
+    .row:hover::before{
+      background:var(--hover-bg);
+      box-shadow:inset 0 1px 0 rgba(148,163,184,.08), 0 10px 30px -15px rgba(2,12,27,.7);
+    }
+    .rows:hover > li{ opacity:.5; transition:opacity .2s; }
+    .rows:hover > li:hover{ opacity:1; }
+  }
+  .row > *{ position:relative; z-index:1; }
+
+  .date{
+    margin-top:4px;
+    font-size:12px; font-weight:600;
+    letter-spacing:.06em; text-transform:uppercase;
+    color:var(--dim);
+    /* long ranges ("Oct 2024 — Feb 2025", 147px) overflow the 115px
+       two-column track; nowrap made them eat the 32px gutter and collide
+       with the title, so let them wrap instead. */
+    line-height:1.35;
+    overflow-wrap:break-word;
+  }
+  @media (min-width:640px){
+    .date{ grid-column:span 2; }
+    .rbody{ grid-column:span 6; }
+  }
+  .rbody h3{ font-size:16px; font-weight:500; color:var(--head); line-height:1.3; }
+  .rbody h3 .co{ color:inherit; }
+  .rbody h3 a{ transition:color .2s; }
+  .rbody h3 a:hover{ color:var(--accent); }
+  .rbody .desc{ margin-top:8px; font-size:14px; line-height:1.55; }
+  .arrow{
+    display:inline-block; width:14px; height:14px;
+    margin-left:4px; vertical-align:-1px;
+    transition:transform .2s;
+  }
+  .rbody h3 a:hover .arrow{ transform:translate(3px,-3px); }
+  @media (prefers-reduced-motion: reduce){
+    .arrow, .navlink .ind{ transition:none; }
+    .rbody h3 a:hover .arrow{ transform:none; }
+  }
+
+  .tags{ display:flex; flex-wrap:wrap; gap:8px 6px; margin-top:12px; }
+  .tags li{
+    background:var(--pill-bg); color:var(--accent);
+    font-size:12px; font-weight:500; line-height:20px;
+    padding:4px 12px; border-radius:9999px;
+  }
+
+  /* hero project — image spans the full row instead of the 2-col thumb slot */
+  .row.hero{ display:block; }
+  .hero .shot{
+    display:block; margin-bottom:16px;
+    border:1px solid rgba(226,232,240,.12); border-radius:6px;
+    overflow:hidden; line-height:0;
+    transition:border-color .2s;
+  }
+  .row.hero:hover .shot{ border-color:rgba(226,232,240,.32); }
+  /* The source shot is 1.52:1, which at full column width stands taller than the
+     copy beside it. Crop to a band instead of scaling down: the chat, the mood
+     pill and her face all sit in the top two thirds, so anchoring high keeps
+     everything that carries meaning and drops the skirt and the Dream button. */
+  .hero .shot img{ width:100%; height:240px; object-fit:cover; object-position:50% 12%; }
+  /* rows with no artwork: let the copy use the thumb's two columns too */
+  @media (min-width:640px){ .row.nothumb .rbody{ grid-column:span 8; } }
+  .links{ display:flex; flex-wrap:wrap; gap:16px; margin-top:12px; font-size:13px; }
+  .links a{ color:var(--dim); transition:color .2s; }
+  .links a:hover{ color:var(--accent); }
+  .priv{ color:var(--dim); font-size:13px; margin-top:12px; }
+
+  /* project thumbnails */
+  .thumb{
+    border:2px solid rgba(226,232,240,.1);
+    border-radius:4px;
+    aspect-ratio:16/10;
+    background:
+      repeating-linear-gradient(45deg, rgba(148,163,184,.06) 0 2px, transparent 2px 9px),
+      #1e293b;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--dim); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    transition:border-color .2s;
+    width:100%;
+    max-width:200px;
+  }
+  .row:hover .thumb{ border-color:rgba(226,232,240,.3); }
+  @media (min-width:640px){
+    .thumb{ grid-column:span 2; order:1; margin-top:4px; }
+    .proj-body{ order:2; }
+  }
+
+  .more{ margin-top:48px; }
+  .more a{
+    display:inline-flex; align-items:center;
+    font-weight:500; color:var(--head);
+  }
+  .more a .arrow{ width:16px; height:16px; margin-left:6px; }
+  .more a:hover{ color:var(--accent); }
+  .more a:hover .arrow{ transform:translate(3px,-3px); }
+
+  footer{ max-width:28rem; padding-bottom:64px; }
+  footer p{ font-size:14px; color:var(--dim); }
+  footer a{ color:var(--text); font-weight:500; transition:color .2s; }
+  footer a:hover{ color:var(--accent); }
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to Content</a>
+<canvas id="bgfx" aria-hidden="true"></canvas>
+<div id="spot" aria-hidden="true"></div>
+
+<div class="container">
+  <div class="layout">
+
+    <!-- ============ left / header ============ -->
+    <header>
+      <div>
+        <h1><a href="./home.html"><span class="txt">Alan Yu</span><canvas id="titlefx" aria-hidden="true"></canvas></a></h1>
+        <h2 class="role">Agent Infrastructure Engineer</h2>
+        <p class="tagline">I build the runtime agents run on — state machines, tool dispatch,
+        sandboxing, and state that survives a restart. The model is a black box I call;
+        everything around it is the part I own.</p>
+        <p class="avail">Looking for a 2026 internship in Paris · English-speaking team ·
+        <strong>Convention de stage</strong> provided</p>
+
+        <nav class="side" aria-label="In-page jump links">
+          <ul>
+            <li><a class="navlink active" href="#about"><span class="ind"></span><span class="navtext">About</span></a></li>
+            <li><a class="navlink" href="#stack"><span class="ind"></span><span class="navtext">Stack</span></a></li>
+            <li><a class="navlink" href="#experience"><span class="ind"></span><span class="navtext">Experience</span></a></li>
+            <li><a class="navlink" href="#projects"><span class="ind"></span><span class="navtext">Projects</span></a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="foot-row">
+        <ul class="socials" aria-label="Social media">
+        <li><a href="https://github.com/Alan-Yu-2077" target="_blank" rel="noreferrer" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a></li>
+        <li><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn (placeholder)">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+        </a></li>
+        <li><a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram (placeholder)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+        </a></li>
+        <li><a href="mailto:yualan077@gmail.com" aria-label="Email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
+        </a></li>
+        </ul>
+        <button id="motion" type="button" hidden aria-pressed="false">pause motion</button>
+      </div>
+    </header>
+
+    <!-- ============ right / main ============ -->
+    <main id="content">
+
+      <section id="about" aria-label="About me">
+        <div class="sticky-head"><h3>About</h3></div>
+        <div class="section-body">
+          <p>I work on the layer underneath the agent. I don't train or fine-tune models — the
+          LLM is a black box I call over a wire, and everything around that call is the part I
+          own: the state machine that drives a turn, the dispatcher that runs its tools under
+          timeouts and abort signals, the sandbox that decides what those tools may touch, and
+          the store that lets a long task survive a restart.</p>
+          <p><a class="hl" href="https://github.com/Alan-Yu-2077/agent-kernel" target="_blank" rel="noreferrer">agent-kernel</a>
+          is that layer on its own — a StateGraph turn loop, a Zod-first registry that validates
+          every tool call at runtime, three-state concurrency so two tools that must never overlap
+          can't, and full-turn tracing you can read in a local viewer.
+          <a class="hl" href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">Luna</a>
+          is where it was extracted from; holdem-arena is what happened when I pointed the same
+          core at a table of agents playing each other. Luna's sandbox has one rule I'm fond of:
+          she may read the files that judge her — the tests, the lint config, the shell
+          deny-regex, the sandbox itself — but she may never write them.</p>
+          <p>I build with AI in the loop and I'm not quiet about it — but every version I ship
+          carries a written note on what changed and why, including the ones that were wrong.
+          Going fast and knowing exactly what you shipped are the same discipline. I also fix
+          other people's things — including
+          <a class="hl" href="https://github.com/moeru-ai/airi" target="_blank" rel="noreferrer">airi</a>,
+          the closest thing Luna has to a rival and some 46,000 stars ahead of her. It's all MIT.
+          Take what's useful.</p>
+        </div>
+      </section>
+
+      <section id="stack" aria-label="Technical focus">
+        <div class="sticky-head"><h3>Stack</h3></div>
+        <div class="section-body">
+          <dl class="stack">
+            <div class="grp">
+              <dt>Agent runtime &amp; scheduling</dt>
+              <dd>State-machine turn loops with bounded tool iteration · multi-agent async
+              scheduling under contention · three-state concurrency (safe-parallel /
+              session-serial / global-serial) · long-horizon state persisted to SQLite and
+              resumed from checkpoint · proactive behaviour on deterministic rails rather
+              than timers · full-turn tracing and replay.</dd>
+            </div>
+            <div class="grp">
+              <dt>Tool execution &amp; isolation</dt>
+              <dd>Runtime type validation at the tool boundary (Zod-first registry, no
+              <code>as</code>) · per-tool timeouts, abort signals and a unified
+              <code>Result&lt;T&gt;</code> · capability sandboxing with canonicalized paths and
+              an evaluator firewall over the files that gate the agent · SSRF-guarded
+              outbound fetch · origin-checked transport, loopback by default.</dd>
+            </div>
+            <div class="grp">
+              <dt>Production engineering</dt>
+              <dd>Strongly-typed full-stack TypeScript · one Zod-typed wire contract shared by
+              server and client, so an unmirrored change is a compile error · fault-tolerant
+              recovery and async event-loop decoupling · every risky feature behind a
+              default-off flag before its default flips · a written rationale per release.</dd>
+            </div>
+          </dl>
+          <p class="also"><strong>Going deeper on</strong> — stronger isolation boundaries for
+          tool execution (MicroVM and Wasm runtimes), distributed scheduling across agent
+          workers, and durable execution / workflow-replay engines. Direction, not shipped
+          work — the sandboxing above is in-process.</p>
+          <p class="also"><strong>Languages &amp; runtime</strong> — TypeScript (strict) · Python ·
+          C++ · Go · Bun · Node · Electron · SQLite · WebSocket · MCP · Anthropic &amp;
+          OpenAI-compatible providers · Git · Docker</p>
+        </div>
+      </section>
+
+      <section id="experience" aria-label="Work experience">
+        <div class="sticky-head"><h3>Experience</h3></div>
+        <div class="section-body">
+          <ol class="rows">
+            <li>
+              <div class="row">
+                <div class="date">2026 — Present</div>
+                <div class="rbody">
+                  <h3><a href="https://www.epita.fr/" target="_blank" rel="noreferrer">BSc Computer Science ·
+                    <span class="co">EPITA, Paris</span>
+                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
+                  </a></h3>
+                  <p class="desc">The Paris year of a Sino-French 3+1 joint programme.
+                  I'm in Paris now, looking for internships across France and the EU.</p>
+                  <ul class="tags"><li>Paris</li><li>Available</li></ul>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="row">
+                <div class="date">Jun 2026 — Present</div>
+                <div class="rbody">
+                  <h3><a href="https://github.com/moeru-ai/airi" target="_blank" rel="noreferrer">Open-source contributor ·
+                    <span class="co">airi (46k★), velin</span>
+                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
+                  </a></h3>
+                  <p class="desc">airi is a desktop AI companion much like Luna — and about 46,000
+                  stars ahead of it. Users kept asking why the character couldn't look things up
+                  online, so I lifted the web layer out of Luna, reshaped it for airi's stage-ui,
+                  and <a class="hl" href="https://github.com/moeru-ai/airi/pull/2066" target="_blank" rel="noreferrer">shipped it</a>.
+                  Also fixed a <a class="hl" href="https://github.com/moeru-ai/airi/pull/2006" target="_blank" rel="noreferrer">background-process
+                  leak</a> in their computer-use MCP, and landed <a class="hl" href="https://github.com/moeru-ai/velin/pull/49" target="_blank" rel="noreferrer">prompt-as-tool</a>
+                  in velin.</p>
+                  <ul class="tags"><li>Open source</li><li>TypeScript</li><li>Vue</li><li>MCP</li></ul>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="row">
+                <div class="date">2025</div>
+                <div class="rbody">
+                  <h3><a href="https://www.bytedance.com/" target="_blank" rel="noreferrer">Campus Partner, Lead ·
+                    <span class="co">ByteDance</span>
+                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
+                  </a></h3>
+                  <p class="desc">Ran hackathons and campus vibe-coding workshops at Chang'an
+                  University — teaching students to ship real things with an LLM in the loop.
+                  Named Outstanding Campus Partner of the Year.</p>
+                  <ul class="tags"><li>Hackathons</li><li>Workshops</li><li>Developer community</li></ul>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="row">
+                <div class="date">Oct 2024 — Feb 2025</div>
+                <div class="rbody">
+                  <h3>Data Engineer, AI Counselor ·
+                    <span class="co">Yiban Dev Group, Chang'an University</span>
+                  </h3>
+                  <p class="desc">Selected 1 of 12 — <a class="hl" href="https://github.com/Alan-Yu-2077/CHU_E-class_interviewtask" target="_blank" rel="noreferrer">the interview tasks are still up</a>.
+                  Data collection, cleaning and ingestion for a campus RAG assistant. Working next
+                  to the team's engineers is where I first saw how an agent is actually put
+                  together — the starting point for everything under Projects.</p>
+                  <ul class="tags"><li>Python</li><li>Selenium</li><li>RAG</li><li>Data pipelines</li></ul>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="row">
+                <div class="date">2023 — 2026</div>
+                <div class="rbody">
+                  <h3>BEng Artificial Intelligence ·
+                    <span class="co">Chang'an University</span>
+                  </h3>
+                  <p class="desc">The first three years of the 3+1, in Xi'an. Everything under
+                  Projects was built alongside coursework, on my own time.</p>
+                  <ul class="tags"><li>Xi'an</li></ul>
+                </div>
+              </div>
+            </li>
+          </ol>
+          <div class="more">
+            <a href="./resume.html" target="_blank" rel="noreferrer">View Full Résumé
+              <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="projects" aria-label="Selected projects">
+        <div class="sticky-head"><h3>Projects</h3></div>
+        <div class="section-body">
+          <ul class="rows">
+            <li>
+              <div class="row nothumb">
+                <div class="rbody proj-body">
+                  <h3><a href="https://github.com/Alan-Yu-2077/agent-kernel" target="_blank" rel="noreferrer">agent-kernel — a persona-free agent runtime
+                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
+                  </a></h3>
+                  <p class="desc">The runtime with the personality taken out. A generic StateGraph
+                  turn loop (<code>parse → build → stream → dispatch → append → finalize</code>,
+                  capped at eight tool iterations), a Zod-first <code>defineTool</code> factory whose
+                  registry validates every call at runtime, and a dispatcher with three-state
+                  concurrency — <code>safe-parallel</code>, <code>session-serial</code>,
+                  <code>global-serial</code> — under per-tool timeouts, abort discipline and one
+                  unified <code>Result&lt;T&gt;</code>. Every turn traces to SQLite and reads back in
+                  a local viewer. Add tools, swap the system prompt, and it is a different agent.</p>
+                  <ul class="tags"><li>TypeScript</li><li>Zod</li><li>Concurrency</li><li>Tracing</li><li>SQLite</li></ul>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="row hero">
+                <a class="shot" href="https://alan-yu-2077.github.io/Luna/" target="_blank" rel="noreferrer" tabindex="-1" aria-hidden="true">
+                  <img src="./assets/luna-hero.jpg" width="1200" height="789" alt="">
+                </a>
+                <div class="rbody">
+                  <h3><a href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">Luna — the long-running agent the kernel came from
+                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
+                  </a></h3>
+                  <p class="desc">An agent that has to survive restarts. Three layers of memory over
+                  one SQLite file with hybrid recall and a relevance floor, an offline consolidation
+                  pass that distills a day into durable facts and reusable skills, and proactive
+                  scheduling behind deterministic rails instead of a timer. Tool access goes through
+                  a capability sandbox with canonicalized paths and an <em>evaluator firewall</em> —
+                  she may read the tests, lint config and shell deny-regex that gate her, never write
+                  them — and web access is SSRF-guarded. Server and client share one Zod-typed
+                  WebSocket contract, so a wire change not mirrored on both sides is a compile error.</p>
+                  <ul class="tags"><li>TypeScript</li><li>Bun</li><li>SQLite</li><li>Sandboxing</li><li>WebSocket</li><li>Electron</li></ul>
+                  <p class="links">
+                    <a href="https://alan-yu-2077.github.io/Luna/" target="_blank" rel="noreferrer">Luna TV — live demo ↗</a>
+                    <a href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">Source ↗</a>
+                  </p>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="row nothumb">
+                <div class="rbody proj-body">
+                  <h3>holdem-arena — multi-agent scheduling under contention</h3>
+                  <p class="desc">N LLM agents with distinct personas act at one table: private
+                  reasoning on one channel, public table talk on the other, humans watching in
+                  god-view. Turn order, per-seat hidden state and cost/latency tiers are all the
+                  scheduler's problem. Built on agent-kernel — the second product off the same core,
+                  which is how I know the abstraction held.</p>
+                  <ul class="tags"><li>TypeScript</li><li>Multi-agent</li><li>Scheduling</li><li>Event-sourced</li></ul>
+                  <p class="priv">Private repository — happy to walk through it.</p>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        <p>Layout study after <a href="https://brittanychiang.com" target="_blank" rel="noreferrer">brittanychiang.com</a>
+        (Brittany Chiang) — rebuilt by hand as the skeleton for this site. No framework, no
+        build step, no dependencies; the ASCII layers are my own.</p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* mouse spotlight */
+const spot = document.getElementById('spot');
+window.addEventListener('mousemove', e => {
+  spot.style.background =
+    'radial-gradient(600px circle at ' + e.clientX + 'px ' + e.clientY + 'px, rgba(29,78,216,.15), transparent 80%)';
+});
+
+/* ascii layer — two pieces:
+ *   1. a full-bleed character field (7×10px cells) running a drifting plasma.
+ *      The cursor pushes a wave through it, clicks send expanding rings. It is
+ *      kept legible by an attenuation grid: wherever real text sits, the field
+ *      thins and dims to ~25%, so it reads bright in the margins and vanishes
+ *      under paragraphs.
+ *   2. the wordmark: "ALAN YU" extruded from the 5×7 dot-matrix font into a
+ *      voxel cloud, perspective-projected with a z-buffer, swaying slowly and
+ *      parallaxing to the cursor.
+ * ?bg=off removes both · ?bg=static freezes them (also on reduced-motion/touch) */
+(() => {
+  const bgCanvas = document.getElementById('bgfx');
+  const titleCanvas = document.getElementById('titlefx');
+  if (!bgCanvas) return;
+  const mode = new URLSearchParams(location.search).get('bg') || 'on';
+  if (mode === 'off') { bgCanvas.remove(); if (titleCanvas) titleCanvas.remove(); return; }
+  const mq = q => window.matchMedia && window.matchMedia(q).matches;
+  // The two layers freeze for different reasons. The field is driven by the
+  // cursor, so on a touch screen it has nothing to react to and may as well hold
+  // still. The wordmark's spin is autonomous — it IS the design — so it keeps
+  // turning on phones and only stops when motion itself is unwelcome.
+  const reduce = mode === 'static' || mq('(prefers-reduced-motion: reduce)');
+  const fieldStill = reduce || mq('(hover: none)');
+  const titleStill = reduce;
+  const still = fieldStill && titleStill;
+
+  const MONO = 'ui-monospace,"SF Mono",Menlo,Consolas,monospace';
+  let dpr = 1;
+
+  // pre-render every glyph at every alpha tier, so the hot loop is drawImage only
+  function makeAtlas(chars, fontPx, cw, ch, color, tiers) {
+    const tw = Math.ceil(cw * dpr), th = Math.ceil(ch * dpr);
+    const cv = document.createElement('canvas');
+    cv.width = tw * chars.length;
+    cv.height = th * tiers.length;
+    const g = cv.getContext('2d');
+    g.font = (fontPx * dpr) + 'px ' + MONO;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = color;
+    for (let t = 0; t < tiers.length; t++) {
+      g.globalAlpha = tiers[t];
+      for (let i = 0; i < chars.length; i++) {
+        if (chars[i] === ' ') continue;
+        g.fillText(chars[i], i * tw + tw / 2, t * th + th / 2);
+      }
+    }
+    return { cv, tw, th };
+  }
+
+  /* ---------------- background character field ---------------- */
+  const CW = 8, CH = 11, FONT = 13;
+  const RAMP = '    ·:-=+*';
+  const TIERS = [0.022, 0.04, 0.062, 0.088, 0.118, 0.15];
+  const bg = bgCanvas.getContext('2d');
+  let cols = 0, rows = 0, W = 0, H = 0;
+  let atlas = null, atten = null, attenDirty = true;
+  let mx = -1e5, my = -1e5;
+  const ripples = [];
+
+  // wherever real text sits the field thins out, so it never competes with content
+  const DIM_SEL = 'h1, .role, .tagline, nav.side, .socials, main .section-body, footer';
+  function buildAtten() {
+    atten.fill(1);
+    const FE = 44, FLOOR = 0.2;
+    document.querySelectorAll(DIM_SEL).forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (!r.width || r.bottom < -FE || r.top > H + FE) return;
+      const gx0 = Math.max(0, ((r.left - FE) / CW) | 0);
+      const gx1 = Math.min(cols - 1, Math.ceil((r.right + FE) / CW));
+      const gy0 = Math.max(0, ((r.top - FE) / CH) | 0);
+      const gy1 = Math.min(rows - 1, Math.ceil((r.bottom + FE) / CH));
+      for (let gy = gy0; gy <= gy1; gy++) {
+        const py = gy * CH + CH * 0.5;
+        const iy = Math.min(py - (r.top - FE), (r.bottom + FE) - py);
+        if (iy <= 0) continue;
+        for (let gx = gx0; gx <= gx1; gx++) {
+          const px = gx * CW + CW * 0.5;
+          const ix = Math.min(px - (r.left - FE), (r.right + FE) - px);
+          if (ix <= 0) continue;
+          const k = Math.min(1, Math.min(ix, iy) / (FE * 1.7));
+          const v = 1 - (1 - FLOOR) * k;
+          const i = gy * cols + gx;
+          if (v < atten[i]) atten[i] = v;
+        }
+      }
+    });
+    attenDirty = false;
+  }
+
+  // per-frame trig tables: the plasma is separable, so each cell costs a few
+  // lookups instead of four sin() calls (~3x cheaper at this cell count)
+  let colS1 = null, colC1 = null, colS2 = null, colC2 = null;
+  let radT = null, mouT = null, RAD_MAX = 0;
+  function buildColTables() {
+    colS1 = new Float32Array(cols); colC1 = new Float32Array(cols);
+    colS2 = new Float32Array(cols); colC2 = new Float32Array(cols);
+    for (let gx = 0; gx < cols; gx++) {
+      const px = gx * CW + CW * 0.5;
+      const a = px * 0.0085, b = px * -0.0050;
+      colS1[gx] = Math.sin(a); colC1[gx] = Math.cos(a);
+      colS2[gx] = Math.sin(b); colC2[gx] = Math.cos(b);
+    }
+    RAD_MAX = Math.ceil(Math.hypot(W, H)) + 2;
+    radT = new Float32Array(RAD_MAX);
+    mouT = new Float32Array(RAD_MAX);
+  }
+
+  function drawField(t) {
+    bg.clearRect(0, 0, W, H);
+    if (attenDirty) buildAtten();
+    const cx = W * 0.42, cy = H * 0.52;
+    for (let i = 0; i < RAD_MAX; i++) {
+      radT[i] = Math.sin(i * 0.0063 - t * 0.5);
+      mouT[i] = i < 420 ? Math.sin(i * 0.034 - t * 3.1) * (1 - i / 420) * 0.7 : 0;
+    }
+    const nR = ripples.length;
+    const last = RAMP.length - 1;
+    for (let gy = 0; gy < rows; gy++) {
+      const py = gy * CH + CH * 0.5;
+      const base = gy * cols;
+      // two oblique waves, expanded with sin(a+b) so only the row part is trig
+      const y1 = py * 0.0057 + t * 0.34, y2 = py * 0.0120 - t * 0.27;
+      const sy1 = Math.sin(y1), cy1 = Math.cos(y1);
+      const sy2 = Math.sin(y2), cy2 = Math.cos(y2);
+      const ddy = py - cy, dy2 = ddy * ddy;
+      const mdy = py - my, mdy2 = mdy * mdy;
+      for (let gx = 0; gx < cols; gx++) {
+        const px = gx * CW + CW * 0.5;
+        const dxc = px - cx;
+        let v = (colS1[gx] * cy1 + colC1[gx] * sy1
+               + colS2[gx] * cy2 + colC2[gx] * sy2
+               + radT[Math.sqrt(dxc * dxc + dy2) | 0]) * 0.333;
+        const mdx = px - mx;
+        const md = Math.sqrt(mdx * mdx + mdy2) | 0;
+        if (md < 420) v += mouT[md];
+        for (let i = 0; i < nR; i++) {
+          const rp = ripples[i], age = t - rp.t;
+          if (age < 0 || age > 2.6) continue;
+          const rx = px - rp.x, ry = py - rp.y;
+          const dd = Math.abs(Math.sqrt(rx * rx + ry * ry) - age * 430);
+          if (dd < 90) v += Math.exp(-dd / 34) * Math.exp(-age * 1.05) * 1.1;
+        }
+        const a = atten[base + gx];
+        const u = (v + 1) * 0.5 * (0.42 + 0.58 * a);
+        let ci = (u * RAMP.length) | 0;
+        if (ci < 3) continue;                       // ramp starts with three blanks
+        if (ci > last) ci = last;
+        let ti = Math.round((ci - 3) / (last - 3) * (TIERS.length - 1) * a);
+        if (ti < 0) ti = 0;
+        bg.drawImage(atlas.cv, ci * atlas.tw, ti * atlas.th, atlas.tw, atlas.th,
+                     gx * CW, gy * CH, CW, CH);
+      }
+    }
+  }
+
+  /* ---------------- voxel wordmark ---------------- */
+  const GLYPHS = {
+    'A': ['01110','10001','10001','11111','10001','10001','10001'],
+    'L': ['10000','10000','10000','10000','10000','10000','11111'],
+    'N': ['10001','11001','11001','10101','10011','10011','10001'],
+    'U': ['10001','10001','10001','10001','10001','10001','01110'],
+    'Y': ['10001','10001','01010','00100','00100','00100','00100'],
+  };
+  // A slab that turns all the way round needs real thickness and enough interior
+  // layers to stay solid edge-on. The letter gap is 2 units rather than 1: an
+  // extruded stroke's side wall spans DEPTH·sin(yaw) sideways, so letters fuse
+  // into one ridge at atan(gap/DEPTH) — 42° here, versus 18° at gap 1 / depth 3.
+  // 42 units long, and the whole length swings through z as the word turns: at
+  // D=24 the near end passes within 5.5 units of the lens, so letters coming
+  // toward you balloon and clip through the edge-on moment. `spin` tumbles fast
+  // enough (7s a revolution) that it reads as a whip-past rather than a defect,
+  // and `f` refits every frame so the mark never changes size.
+  const WORD = 'ALAN YU', ADV = 7, SPACE_ADV = 2, SUB = 4, ZS = 4, DEPTH = 2.1;
+  const SPIN = 2 * Math.PI / 18;            // one revolution every 18s
+  // Elevation stays shallow and constant. The word is 41 units long, so every
+  // degree of pitch sweeps its far end vertically by far more than its own cap
+  // height — a steeper tilt makes the fitted wordmark dramatically smaller.
+  const PITCH = -0.07;
+  // Deliberately no pitch wobble, though the playground's `spin` scene has one.
+  // Measured: ±2° of nod costs 13% of the fitted width (337→294px) and ±3° costs
+  // 19% (→272px, under the 291px floor where a stroke stops covering two cells).
+  // A nod small enough to afford is too small to see. Perspective buys the same
+  // solidity far cheaper — see T_D.
+  // Lay the letters out along a cursor rather than on a fixed grid, so the word
+  // space can be narrower than a whole letter advance — a blank cell's worth of
+  // air reads as a chasm between ALAN and YU at this size.
+  const layout = [];
+  let cur = 0;
+  for (const ch of WORD) {
+    if (!GLYPHS[ch]) { cur += SPACE_ADV; continue; }
+    layout.push({ g: GLYPHS[ch], x0: cur });
+    cur += ADV;
+  }
+  const wordW = cur - (ADV - 5);            // drop the trailing inter-letter gap
+  // smaller cells than the field's: the wordmark is physically smaller now, and
+  // shading detail needs cells per stroke more than it needs big glyphs
+  // Cell size is what gives the wordmark its weight — shrinking it to 4×6 to buy
+  // shading resolution made every character visibly thinner, which cost more than
+  // the extra detail was worth.
+  // Finer cells than the background field, and a font sized to *fit* them. An
+  // earlier pass rejected 4x6 believing it thinned the strokes — it doesn't, so
+  // long as the font isn't scaled down with the cell: a stroke that covered 1.6
+  // cells at 5x7 covers 2.1 at 4x6, and the letters read solid instead of
+  // skeletal. Measured: word 313→327px, columns across the word 81→101, mean ink
+  // 42.7→43.7. Keeping T_FONT at 9 here would look solid too, but every ramp
+  // glyph clips toward a filled block and the density ramp collapses — spatial
+  // detail bought at the cost of tonal detail. 7 fits the cell, so `.:-=+*#%@`
+  // stay distinguishable and the shading keeps its steps.
+  const T_CW = 4, T_CH = 6, T_FONT = 7;
+  // a longer ramp and more alpha tiers: real normal lighting produces a
+  // continuous range of values, and coarse steps would band the bevel
+  const T_RAMP = ' ·:;=+*#%@';           // RAMP3D, verbatim from the playground
+  const T_TIERS = [0.10, 0.26, 0.42, 0.60, 0.80, 1];
+  const BEVEL = 1.0;                        // how far the cap chamfers at a stroke edge
+  // Key light sits close to the view axis, so a cap facing us takes the full
+  // ink of the ramp; the chamfered edges tilt away from it and go darker. An
+  // off-axis light instead capped the flat face below maximum, which thinned
+  // every stroke by a whole ramp step.
+  const LX = -0.25, LY = -0.30, LZ = -0.92;
+  const L_AMB = -0.20, L_GAIN = 1.30;       // remap so a facing cap lands at 1.0
+  // Build the slab as a surface shell with a real outward normal per voxel. A
+  // flat cap lit only by "how squarely it faces the camera" is uniformly bright
+  // head-on, which is exactly why the wordmark read flat at 0°; chamfering the
+  // cap where a stroke ends and lighting it directionally gives every stroke a
+  // bright edge and a shaded edge, so the letters look raised even face-on.
+  // The playground's ALAN factory, verbatim: a solid voxel block (no surface
+  // shell, no normals, no mirrored back plate) whose only shading input is which
+  // z-layer a voxel sits on. `spin` needs nothing else.
+  const YS = 1.28;                          // vertical stretch
+  const pts = [];
+  for (const { g, x0 } of layout) {
+    for (let py = 0; py < 7; py++) for (let px = 0; px < 5; px++) {
+      if (g[py][px] !== '1') continue;
+      for (let sy = 0; sy < SUB; sy++) for (let sx = 0; sx < SUB; sx++) for (let zi = 0; zi < ZS; zi++) {
+        pts.push({
+          x: x0 + px + (sx + 0.5) / SUB - wordW / 2,
+          y: (py + (sy + 0.5) / SUB - 3.5) * YS,
+          z: (zi / (ZS - 1) - 0.5) * DEPTH,
+          s0: zi === 0 ? 1 : zi === ZS - 1 ? 0.45 : 0.6   // front face brightest
+        });
+      }
+    }
+  }
+  // With a four-letter word the fit is height-limited, not width-limited, so
+  // pulling the camera in costs nothing at all: measured fitted width is a flat
+  // 243px from D=55 down to D=16, while the near/far ratio climbs 1.62× → 9.67×.
+  // 24 matches the playground's `spin` scene (3.4×) — past that the near end
+  // starts to bulge rather than taper.
+  const T_D = 24, T_ASP = T_CW / T_CH;
+  // helpers the ported scene expects
+  const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const levelFor = (idx, len) => { const p = idx / (len - 1); return p < 0.34 ? 1 : p < 0.72 ? 2 : 3; };
+  const tctx = titleCanvas ? titleCanvas.getContext('2d') : null;
+  let tCols = 0, tRows = 0, tW = 0, tH = 0, tAtlas = null, tZ = null, tC = null, tT = null;
+  let tF = 0;                               // focal length, fixed for the whole spin
+
+  // Projected extent of the slab's bounding box at unit focal length. The box is
+  // convex, so every voxel projects inside the hull of its eight corners.
+  function extentAt(yaw, pit) {
+    const cy_ = Math.cos(yaw), sy_ = Math.sin(yaw);
+    const cp = Math.cos(pit), sp = Math.sin(pit);
+    let xmin = 1e9, xmax = -1e9, ymin = 1e9, ymax = -1e9;
+    for (let a = -1; a <= 1; a += 2) for (let b = -1; b <= 1; b += 2) for (let c = -1; c <= 1; c += 2) {
+      const X = a * wordW / 2, Y = b * 3.5, Z = c * DEPTH / 2;
+      const x1 = X * cy_ + Z * sy_, z1 = -X * sy_ + Z * cy_;
+      const y2 = Y * cp - z1 * sp, z2 = Y * sp + z1 * cp;
+      const ooz = 1 / (T_D + z2);
+      const xx = ooz * x1, yy = ooz * y2 * T_ASP;
+      if (xx < xmin) xmin = xx; if (xx > xmax) xmax = xx;
+      if (yy < ymin) ymin = yy; if (yy > ymax) ymax = yy;
+    }
+    return { xmin, xmax, ymin, ymax };
+  }
+
+  // One size for the whole revolution: fit the *worst* angle, so the wordmark
+  // never clips and never pulses larger as it turns edge-on.
+  // `spin` sizes itself every frame and centres the word in the grid, so there is
+  // no focal length to solve for — but centring leaves the mark visibly indented
+  // from the copy below it. Re-derive the face-on pose (its widest) from spin's
+  // own numbers and pull the canvas left by exactly that inset.
+  function fitTitle() {
+    const f = Math.min(tCols * 0.8 / wordW, tRows * 0.6 / (7 * YS * T_ASP)) * 24;
+    const half = f * (wordW / 2) / (24 + 2.5);
+    const inset = (tCols / 2 - half) * T_CW;
+    titleCanvas.style.marginLeft = (-inset).toFixed(1) + 'px';
+  }
+
+  // ---- the playground's `spin` scene, verbatim (index.html sceneSpin) ----
+  // whole word tumbling continuously (classic demoscene logo spin)
+  function drawTitle(t) {
+    if (!tctx || !tCols) return;
+    tctx.clearRect(0, 0, tW, tH);
+    tZ.fill(0); tC.fill(255);
+    const cols = tCols, rows = tRows, aspect = T_ASP;
+    const D = 24, Z0 = 2.5, len = T_RAMP.length;
+    const yaw = t * 0.9, pit = Math.sin(t * 0.37) * 0.16 - 0.04, rol = Math.sin(t * 0.23) * 0.06;
+    const cyw = Math.cos(yaw), syw = Math.sin(yaw);
+    const cpt = Math.cos(pit), spt = Math.sin(pit);
+    const crl = Math.cos(rol), srl = Math.sin(rol);
+    const f = Math.min(cols * 0.8 / wordW, rows * 0.6 / (7 * YS * aspect)) * D;
+    const ccx = cols / 2, ccy = rows / 2;
+    for (let n = 0; n < pts.length; n++) {
+      const p = pts[n];
+      const X = p.x * crl - p.y * srl, Y = p.x * srl + p.y * crl;
+      const X2 = X * cyw + p.z * syw, Z2 = -X * syw + p.z * cyw;
+      const Y2 = Y * cpt - Z2 * spt, Z3 = Y * spt + Z2 * cpt + Z0;
+      const zc = D + Z3;
+      if (zc < 4) continue;
+      const ooz = 1 / zc;
+      const xp = Math.round(ccx + f * ooz * X2);
+      const yp = Math.round(ccy + f * aspect * ooz * Y2);
+      if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
+      const gi = yp * cols + xp;
+      if (ooz <= tZ[gi]) continue;
+      tZ[gi] = ooz;
+      const near = clamp01(0.5 - Z3 / 14);
+      const v = p.s0 * (0.4 + 0.8 * near);
+      const idx = Math.max(1, Math.min(len - 1, Math.floor(v * len)));
+      tC[gi] = idx;
+      tT[gi] = levelFor(idx, len);
+    }
+    for (let gy = 0; gy < tRows; gy++) {
+      for (let gx = 0; gx < tCols; gx++) {
+        const k = gy * tCols + gx;
+        if (tC[k] === 255) continue;
+        tctx.drawImage(tAtlas.cv, tC[k] * tAtlas.tw, tT[k] * tAtlas.th, tAtlas.tw, tAtlas.th,
+                       gx * T_CW, gy * T_CH, T_CW, T_CH);
+      }
+    }
+  }
+
+  /* ---------------- wiring ---------------- */
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    W = innerWidth; H = innerHeight;
+    bgCanvas.width = Math.round(W * dpr);
+    bgCanvas.height = Math.round(H * dpr);
+    bgCanvas.style.width = W + 'px';
+    bgCanvas.style.height = H + 'px';
+    bg.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cols = Math.ceil(W / CW); rows = Math.ceil(H / CH);
+    atten = new Float32Array(cols * rows);
+    attenDirty = true;
+    atlas = makeAtlas(RAMP, FONT, CW, CH, '#e2e8f0', TIERS);
+    buildColTables();
+
+    if (tctx) {
+      // Measure with no inline geometry of our own: writing a px width back onto
+      // the canvas would make the next resize read that value instead of the CSS
+      // one, so the wordmark could only ever grow — and it overflowed the page.
+      titleCanvas.style.width = '';
+      titleCanvas.style.height = '';
+      titleCanvas.style.marginLeft = '';
+      const r = titleCanvas.getBoundingClientRect();
+      tW = Math.round(r.width); tH = Math.round(r.height);
+      if (tW > 0 && tH > 0) {
+        titleCanvas.width = Math.round(tW * dpr);
+        titleCanvas.height = Math.round(tH * dpr);
+        tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        tCols = Math.floor(tW / T_CW); tRows = Math.floor(tH / T_CH);
+        tZ = new Float32Array(tCols * tRows);
+        tC = new Uint8Array(tCols * tRows);
+        tT = new Uint8Array(tCols * tRows);
+        tAtlas = makeAtlas(T_RAMP, T_FONT, T_CW, T_CH, '#e2e8f0', T_TIERS);
+        fitTitle();
+      }
+    }
+  }
+  // frozen layers rest at t=0, where the wordmark faces the viewer squarely —
+  // a paused spin must not leave the site's name stopped edge-on
+  function render(t) {
+    drawField(fieldStill ? 0 : t);
+    drawTitle(titleStill ? 0 : t);
+  }
+
+  const h1 = document.querySelector('h1');
+  if (tctx && h1) h1.classList.add('has-fx');
+  resize();
+  render(0);
+
+  window.addEventListener('resize', () => { resize(); render(0); });
+  window.addEventListener('scroll', () => { attenDirty = true; }, { passive: true });
+  window.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    if (fieldStill) drawField(0);          // frozen field still answers the cursor
+  }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', () => { mx = my = -1e5; });
+  window.addEventListener('mousedown', e => {
+    ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() / 1000 });
+    if (ripples.length > 6) ripples.shift();
+  }, { passive: true });
+
+  window.__bg = { frame: t => { drawField(t); drawTitle(t); }, still, fieldStill, titleStill, resize };
+  if (still) return;
+
+  /* Motion runs forever next to body text, so WCAG 2.2.2 wants a control the
+   * reader can operate — prefers-reduced-motion alone does not satisfy it. */
+  let paused = false;
+  try { paused = localStorage.getItem('alan-motion') === 'off'; } catch (_) {}
+  const toggle = document.getElementById('motion');
+  function syncToggle() {
+    if (!toggle) return;
+    toggle.textContent = paused ? 'play motion' : 'pause motion';
+    toggle.setAttribute('aria-pressed', String(paused));
+  }
+  if (toggle) {
+    syncToggle();
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      paused = !paused;
+      try { localStorage.setItem('alan-motion', paused ? 'off' : 'on'); } catch (_) {}
+      syncToggle();
+    });
+  }
+
+  const FPS = 24;
+  // An accumulated clock, not the absolute one: the spin therefore starts at
+  // yaw 0 — every visitor's first frame is the wordmark facing them — and
+  // pausing holds the pose instead of jumping ahead on resume.
+  let clock = 0, last = -1e4, prev = -1;
+  function tick(now) {
+    if (document.hidden || now - last < 1000 / FPS) return;
+    const dt = prev < 0 ? 0 : Math.min(0.25, (now - prev) / 1000);
+    prev = now; last = now;
+    if (!paused) clock += dt;
+    if (!fieldStill) drawField(clock);            // still redraws while paused,
+    if (!titleStill && !paused) drawTitle(clock); // so the cursor reveal lives on
+  }
+  (function loop(now) { tick(now); requestAnimationFrame(loop); })(performance.now());
+  setInterval(() => tick(performance.now()), 1000 / FPS);   // fallback where rAF is throttled
+})();
+
+/* scroll spy for the side nav */
+const links = Array.from(document.querySelectorAll('nav.side a'));
+const byId = {};
+links.forEach(a => { byId[a.getAttribute('href').slice(1)] = a; });
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (en.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const link = byId[en.target.id];
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+Object.keys(byId).forEach(id => {
+  const sec = document.getElementById(id);
+  if (sec) io.observe(sec);
+});
+
+})();
+</script>
+</body>
+</html>

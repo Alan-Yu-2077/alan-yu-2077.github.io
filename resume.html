@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alan Yu · Résumé</title>
+<meta name="description" content="Alan Yu — Agent Infrastructure Engineer. Résumé.">
+<style>
+  /* ---------------------------------------------------------------
+     Palette lifted from the previous résumé: warm near-black sidebar,
+     cream page, terracotta accent.
+     --------------------------------------------------------------- */
+  :root{
+    --ink:#2a2724;        /* sidebar bg / heading text */
+    --paper:#faf6f1;      /* page bg */
+    --accent:#c2653e;     /* terracotta */
+    --side-text:#c8c1b7;
+    --side-dim:#8d857a;
+    --body:#33302c;
+    --muted:#6f675d;
+    --rule:#ddd3c6;
+    --pill:#ece4d9;
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:#8d857a;
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Segoe UI",Arial,sans-serif;
+    font-size:9.4pt; line-height:1.42; color:var(--body);
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{ font-family:Georgia,"Iowan Old Style","Times New Roman",serif; }
+
+  .page{
+    width:210mm; min-height:297mm;
+    margin:12mm auto; background:var(--paper);
+    display:grid; grid-template-columns:62mm 1fr;
+    box-shadow:0 4px 24px rgba(0,0,0,.28);
+    overflow:hidden;
+  }
+
+  /* ---------------- sidebar ---------------- */
+  aside{ background:var(--ink); color:var(--side-text); padding:11mm 7mm 9mm; }
+  .name{
+    font-size:23pt; font-weight:700; line-height:1.05;
+    color:#f2ede6; text-align:center; letter-spacing:-.01em;
+  }
+  .name em{ font-style:normal; color:var(--accent); }
+  .role{
+    margin-top:5mm; text-align:center;
+    font-size:7.4pt; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--accent);
+  }
+  .badge{
+    display:block; margin:4mm auto 0; width:max-content;
+    border:.9px solid var(--accent); border-radius:999px;
+    padding:1.4mm 4mm; font-size:7.6pt; color:var(--accent);
+  }
+  .rule{ height:.9px; background:#48423b; margin:7mm 0 6mm; }
+
+  aside h2{
+    margin:0 0 3mm; font-size:7.4pt; font-weight:700;
+    letter-spacing:.15em; text-transform:uppercase; color:var(--accent);
+  }
+  aside h2:not(:first-of-type){ margin-top:5.5mm; }
+  .contact{ list-style:none; margin:0; padding:0; }
+  .contact li{ display:flex; gap:2.6mm; align-items:flex-start; margin-bottom:2.4mm; }
+  .contact svg{ width:3.5mm; height:3.5mm; flex:none; margin-top:.5mm; stroke:var(--side-dim); }
+  .contact svg.solid{ stroke:none; fill:var(--side-dim); }
+  .contact a{ color:inherit; text-decoration:none; word-break:break-all; }
+
+  .profile{ margin:0; color:var(--side-text); }
+  .skill{ margin:0 0 2.2mm; }
+  .skill b{ color:#e8e1d7; font-weight:600; }
+  .skill .k{ color:var(--accent); font-weight:600; }
+  .skill.lead b{ margin-right:1mm; }
+  .langs{ margin:0; }
+  aside code, main code{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:.88em;
+  }
+  aside code{ color:var(--accent); }
+
+  /* ---------------- main ---------------- */
+  main{ padding:11mm 10mm 9mm 9mm; }
+  main h2{
+    margin:0 0 3mm; padding-bottom:1.6mm;
+    border-bottom:1.1px solid var(--rule);
+    font-size:13pt; font-weight:700; color:var(--accent);
+  }
+  main h2:not(:first-child){ margin-top:4.4mm; }
+
+  .item{ margin-bottom:2.6mm; }
+  .item:last-child{ margin-bottom:0; }
+  .top{ display:flex; justify-content:space-between; align-items:baseline; gap:4mm; }
+  .what{ font-size:10.2pt; font-weight:700; color:var(--ink); }
+  .what .light{ font-weight:400; color:var(--muted); }
+  .when{ font-size:8.4pt; color:var(--muted); white-space:nowrap; }
+  .meta{
+    margin:.7mm 0 1.4mm; font-size:8.4pt; font-style:italic; color:var(--accent);
+  }
+  .meta a{ color:var(--accent); text-decoration:none; }
+  .lede{
+    margin:0 0 1.4mm; padding-left:3mm;
+    border-left:1.6px solid var(--accent); color:var(--muted);
+  }
+  ul.pts{ margin:0; padding:0; list-style:none; }
+  ul.pts li{ position:relative; padding-left:3.4mm; margin-bottom:.9mm; }
+  ul.pts li::before{
+    content:""; position:absolute; left:.5mm; top:1.55mm;
+    width:1.3mm; height:1.3mm; border-radius:50%; background:var(--accent);
+  }
+  ul.pts b{ color:var(--ink); font-weight:600; }
+  ul.pts a{ color:var(--accent); text-decoration:none; font-weight:600; }
+  .tags{ margin:1.6mm 0 0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:1.4mm; }
+  .tags li{ background:var(--pill); border-radius:2px; padding:.7mm 2mm; font-size:7.8pt; color:#4b463f; }
+
+  /* ---------------- print ---------------- */
+  @page{ size:A4; margin:0; }
+  @media print{
+    body{ background:none; }
+    .page{ margin:0; box-shadow:none; width:auto; min-height:0; }
+    a{ color:inherit; }
+  }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ================= sidebar ================= -->
+  <aside>
+    <div class="name serif">Alan <em>Yu</em></div>
+    <div class="role">Agent Infrastructure Engineer</div>
+    <span class="badge">Internship · Paris · EN</span>
+
+    <div class="rule"></div>
+
+    <h2>Contact</h2>
+    <ul class="contact">
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
+        <a href="mailto:yualan077@gmail.com">yualan077@gmail.com</a>
+      </li>
+      <li>
+        <svg class="solid" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        <a href="https://github.com/Alan-Yu-2077">github.com/Alan-Yu-2077</a>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Paris, France</span>
+      </li>
+    </ul>
+
+    <h2>Profile</h2>
+    <p class="profile">I build the layer underneath the agent — turn loops, tool dispatch,
+    sandboxing, and state that survives a restart. I don't train models; the LLM is a black box
+    I call, and the engineering around that call is what I own.</p>
+
+    <h2>Core Skills</h2>
+    <p class="skill lead"><b>Runtime &amp; scheduling</b>State-machine turn loops · multi-agent
+    async scheduling · three-state concurrency · checkpointed long-horizon state · full-turn tracing.</p>
+    <p class="skill lead"><b>Execution &amp; isolation</b>Zod-first runtime validation at the tool
+    boundary · timeouts and abort signals · capability sandboxing · SSRF-guarded fetch.</p>
+    <p class="skill lead"><b>Production</b>Strongly-typed full-stack TS · a shared wire contract
+    that fails at compile time · fault tolerance · default-off flags for risky features.</p>
+    <p class="skill"><span class="k">Code</span> — TypeScript · Python · C++ · Go</p>
+    <p class="skill"><span class="k">Runtime</span> — Bun · Node · Electron · SQLite · WebSocket · MCP · Docker</p>
+
+
+    <h2>Languages</h2>
+    <p class="langs">Chinese (native) · English (fluent — working language)<br><b>Convention de stage</b> available</p>
+  </aside>
+
+  <!-- ================= main ================= -->
+  <main>
+
+    <h2 class="serif">Projects</h2>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">agent-kernel <span class="light">— persona-free agent runtime · solo</span></div>
+      </div>
+      <div class="meta">TypeScript ·
+        <a href="https://github.com/Alan-Yu-2077/agent-kernel">[GitHub]</a>
+      </div>
+      <ul class="pts">
+        <li><b>Turn engine:</b> a generic StateGraph loop (parse → build → stream → dispatch →
+        append → finalize) driving streamed turns with interleaved tool use, bounded at eight
+        tool iterations.</li>
+        <li><b>Tool kernel:</b> Zod-first <code>defineTool</code> factory and typed registry;
+        dispatcher with three-state concurrency (safe-parallel / session-serial / global-serial),
+        per-tool timeouts, abort discipline and a unified <code>Result&lt;T&gt;</code>.</li>
+      </ul>
+    </div>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">Luna <span class="light">— long-running desktop agent · solo</span></div>
+      </div>
+      <div class="meta">Python prototype → TypeScript rewrite ·
+        <a href="https://github.com/Alan-Yu-2077/Luna">[GitHub]</a>
+        <a href="https://alan-yu-2077.github.io/Luna/">[Demo]</a>
+      </div>
+      <ul class="pts">
+        <li><b>Durable state:</b> three memory layers over one SQLite file with hybrid recall and
+        a relevance floor; an offline pass distills each day into durable facts and reusable
+        skills, so a restart loses nothing.</li>
+        <li><b>Isolation:</b> capability sandbox with canonicalized paths and an evaluator
+        firewall — the agent may read the tests and configs that gate it, never write them;
+        SSRF-guarded fetch, origin-checked transport.</li>
+        <li><b>Contract:</b> one Zod-typed WebSocket protocol shared by server and client — an
+        unmirrored wire change is a compile error. 215 releases in seven weeks, each logged.</li>
+      </ul>
+    </div>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">holdem-arena <span class="light">— multi-agent scheduling · solo</span></div>
+      </div>
+      <div class="meta">TypeScript</div>
+      <ul class="pts">
+        <li>N agents act at one table under contention — turn order, per-seat hidden state and
+        two-channel output are the scheduler's problem. Built on agent-kernel: a second product
+        off the same core.</li>
+      </ul>
+    </div>
+
+    <h2 class="serif">Open Source</h2>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">moeru-ai/airi <span class="light">— 46k ★ · 2 PRs merged</span></div>
+        <div class="when">2026.06 – present</div>
+      </div>
+      <ul class="pts">
+        <li>Lifted Luna's web layer out and reshaped it for airi's stage-ui
+        (<a href="https://github.com/moeru-ai/airi/pull/2066">#2066</a>); fixed a
+        background-process leak in their computer-use MCP
+        (<a href="https://github.com/moeru-ai/airi/pull/2006">#2006</a>). Two more in review.</li>
+      </ul>
+    </div>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">moeru-ai/velin <span class="light">— 1 PR merged</span></div>
+        <div class="when">2026.07</div>
+      </div>
+      <ul class="pts">
+        <li>Exposed a prompt component as an LLM tool
+        (<a href="https://github.com/moeru-ai/velin/pull/49">#49</a>).</li>
+      </ul>
+    </div>
+
+    <h2 class="serif">Experience</h2>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">Campus Partner, Lead <span class="light">· ByteDance</span></div>
+        <div class="when">2025</div>
+      </div>
+      <ul class="pts">
+        <li>Ran hackathons and campus vibe-coding workshops at Chang'an University.
+        Named <b>Outstanding Campus Partner of the Year</b>.</li>
+      </ul>
+    </div>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">Technical Intern <span class="light">· E-class, Chang'an University</span></div>
+        <div class="when">2024.10 – 2025.02</div>
+      </div>
+      <ul class="pts">
+        <li>Selected <b>1 of 12</b>. Owned data collection, cleaning and ingestion for a campus
+        RAG assistant — browser automation with pagination and resume-on-restart.</li>
+        <li>Picked up how an agent is actually structured from the engineers around me. This is
+        where everything above started.</li>
+      </ul>
+    </div>
+
+    <h2 class="serif">Education</h2>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">BSc Computer Science <span class="light">· EPITA, Paris</span></div>
+        <div class="when">2026.09 – 2027.06 (expected)</div>
+      </div>
+      <div class="meta">Chang'an University × EPITA · Sino-French 3+1 joint programme</div>
+    </div>
+
+    <div class="item">
+      <div class="top">
+        <div class="what">BEng Artificial Intelligence <span class="light">· Chang'an University</span></div>
+        <div class="when">2023.09 – 2026.07</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>
