@@ -346,9 +346,8 @@
       <div>
         <h1><a href="./home.html"><span class="txt">Alan Yu</span><canvas id="titlefx" aria-hidden="true"></canvas></a></h1>
         <h2 class="role">Agent Infrastructure Engineer</h2>
-        <p class="tagline">I build the runtime agents run on — state machines, tool dispatch,
-        sandboxing, and state that survives a restart. The model is a black box I call;
-        everything around it is the part I own.</p>
+        <p class="tagline">I design and build AI products end to end — from the turn loop
+        to the face. I build agents shaped to the problem, not to the framework.</p>
         <p class="avail">Looking for a 2026 internship in Paris · English-speaking team ·
         <strong>Convention de stage</strong> provided</p>
 
@@ -387,20 +386,15 @@
       <section id="about" aria-label="About me">
         <div class="sticky-head"><h3>About</h3></div>
         <div class="section-body">
-          <p>I work on the layer underneath the agent. I don't train or fine-tune models — the
-          LLM is a black box I call over a wire, and everything around that call is the part I
-          own: the state machine that drives a turn, the dispatcher that runs its tools under
-          timeouts and abort signals, the sandbox that decides what those tools may touch, and
-          the store that lets a long task survive a restart.</p>
-          <p><a class="hl" href="https://github.com/Alan-Yu-2077/agent-kernel" target="_blank" rel="noreferrer">agent-kernel</a>
-          is that layer on its own — a StateGraph turn loop, a Zod-first registry that validates
-          every tool call at runtime, three-state concurrency so two tools that must never overlap
-          can't, and full-turn tracing you can read in a local viewer.
+          <p>I build things that feel like someone's there.
           <a class="hl" href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">Luna</a>
-          is where it was extracted from; holdem-arena is what happened when I pointed the same
-          core at a table of agents playing each other. Luna's sandbox has one rule I'm fond of:
-          she may read the files that judge her — the tests, the lint config, the shell
-          deny-regex, the sandbox itself — but she may never write them.</p>
+          is a companion, not an assistant — she remembers, she starts conversations on her own,
+          she has a face and a voice. She also has no installer, on purpose: she's one person's
+          companion, and the instance that matters lives on one machine.</p>
+          <p>What I can't help is the detail nobody asked for. The wordmark up there is a voxel
+          block, tumbling on three axes, rendered per frame into character cells small enough that
+          a stroke still reads solid. The character field behind this text thins out wherever there
+          are words to read. Nobody would have noticed if I'd skipped either one.</p>
           <p>I build with AI in the loop and I'm not quiet about it — but every version I ship
           carries a written note on what changed and why, including the ones that were wrong.
           Going fast and knowing exactly what you shipped are the same discipline. I also fix
@@ -417,8 +411,8 @@
           <dl class="stack">
             <div class="grp">
               <dt>Agent runtime &amp; scheduling</dt>
-              <dd>State-machine turn loops with bounded tool iteration · multi-agent async
-              scheduling under contention · three-state concurrency (safe-parallel /
+              <dd>State-machine turn loops with bounded tool iteration · three-state
+              concurrency (safe-parallel /
               session-serial / global-serial) · long-horizon state persisted to SQLite and
               resumed from checkpoint · proactive behaviour on deterministic rails rather
               than timers · full-turn tracing and replay.</dd>
@@ -439,9 +433,9 @@
               default-off flag before its default flips · a written rationale per release.</dd>
             </div>
           </dl>
-          <p class="also"><strong>Going deeper on</strong> — stronger isolation boundaries for
-          tool execution (MicroVM and Wasm runtimes), distributed scheduling across agent
-          workers, and durable execution / workflow-replay engines. Direction, not shipped
+          <p class="also"><strong>Going deeper on</strong> — multi-agent scheduling under contention,
+          stronger isolation boundaries for tool execution (MicroVM and Wasm runtimes),
+          distributed scheduling across agent workers, and durable execution / workflow-replay engines. Direction, not shipped
           work — the sandboxing above is in-process.</p>
           <p class="also"><strong>Languages &amp; runtime</strong> — TypeScript (strict) · Python ·
           C++ · Go · Bun · Node · Electron · SQLite · WebSocket · MCP · Anthropic &amp;
@@ -543,41 +537,21 @@
         <div class="section-body">
           <ul class="rows">
             <li>
-              <div class="row nothumb">
-                <div class="rbody proj-body">
-                  <h3><a href="https://github.com/Alan-Yu-2077/agent-kernel" target="_blank" rel="noreferrer">agent-kernel — a persona-free agent runtime
-                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
-                  </a></h3>
-                  <p class="desc">The runtime with the personality taken out. A generic StateGraph
-                  turn loop (<code>parse → build → stream → dispatch → append → finalize</code>,
-                  capped at eight tool iterations), a Zod-first <code>defineTool</code> factory whose
-                  registry validates every call at runtime, and a dispatcher with three-state
-                  concurrency — <code>safe-parallel</code>, <code>session-serial</code>,
-                  <code>global-serial</code> — under per-tool timeouts, abort discipline and one
-                  unified <code>Result&lt;T&gt;</code>. Every turn traces to SQLite and reads back in
-                  a local viewer. Add tools, swap the system prompt, and it is a different agent.</p>
-                  <ul class="tags"><li>TypeScript</li><li>Zod</li><li>Concurrency</li><li>Tracing</li><li>SQLite</li></ul>
-                </div>
-              </div>
-            </li>
-            <li>
               <div class="row hero">
                 <a class="shot" href="https://alan-yu-2077.github.io/Luna/" target="_blank" rel="noreferrer" tabindex="-1" aria-hidden="true">
                   <img src="./assets/luna-hero.jpg" width="1200" height="789" alt="">
                 </a>
                 <div class="rbody">
-                  <h3><a href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">Luna — the long-running agent the kernel came from
+                  <h3><a href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">Luna — a desktop AI companion
                     <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
                   </a></h3>
-                  <p class="desc">An agent that has to survive restarts. Three layers of memory over
-                  one SQLite file with hybrid recall and a relevance floor, an offline consolidation
-                  pass that distills a day into durable facts and reusable skills, and proactive
-                  scheduling behind deterministic rails instead of a timer. Tool access goes through
-                  a capability sandbox with canonicalized paths and an <em>evaluator firewall</em> —
-                  she may read the tests, lint config and shell deny-regex that gate her, never write
-                  them — and web access is SSRF-guarded. Server and client share one Zod-typed
-                  WebSocket contract, so a wire change not mirrored on both sides is a compile error.</p>
-                  <ul class="tags"><li>TypeScript</li><li>Bun</li><li>SQLite</li><li>Sandboxing</li><li>WebSocket</li><li>Electron</li></ul>
+                  <p class="desc">She remembers across months, opens conversations herself, and has
+                  a face. Three layers of memory over one SQLite file with hybrid recall, and a
+                  nightly dream cycle that distills the day into facts, a diary, and skills she
+                  keeps for herself. Live2D avatar, phoneme lip-sync, and a cloned voice you
+                  install without ever opening a terminal — all behind a single Zod-typed
+                  WebSocket contract.</p>
+                  <ul class="tags"><li>TypeScript</li><li>Bun</li><li>Electron</li><li>SQLite</li><li>Live2D</li><li>Anthropic API</li></ul>
                   <p class="links">
                     <a href="https://alan-yu-2077.github.io/Luna/" target="_blank" rel="noreferrer">Luna TV — live demo ↗</a>
                     <a href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">Source ↗</a>
@@ -588,14 +562,14 @@
             <li>
               <div class="row nothumb">
                 <div class="rbody proj-body">
-                  <h3>holdem-arena — multi-agent scheduling under contention</h3>
-                  <p class="desc">N LLM agents with distinct personas act at one table: private
-                  reasoning on one channel, public table talk on the other, humans watching in
-                  god-view. Turn order, per-seat hidden state and cost/latency tiers are all the
-                  scheduler's problem. Built on agent-kernel — the second product off the same core,
-                  which is how I know the abstraction held.</p>
-                  <ul class="tags"><li>TypeScript</li><li>Multi-agent</li><li>Scheduling</li><li>Event-sourced</li></ul>
-                  <p class="priv">Private repository — happy to walk through it.</p>
+                  <h3><a href="https://github.com/Alan-Yu-2077/agent-kernel" target="_blank" rel="noreferrer">agent-kernel
+                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
+                  </a></h3>
+                  <p class="desc">What's left of Luna once you take her personality out: a
+                  StateGraph turn loop, a Zod-first tool registry with three-state concurrency,
+                  a provider abstraction, and full-turn tracing you can read in a local viewer.
+                  Add tools, swap the system prompt, and it's a different agent.</p>
+                  <ul class="tags"><li>TypeScript</li><li>Zod</li><li>SQLite</li></ul>
                 </div>
               </div>
             </li>

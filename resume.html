@@ -40,7 +40,7 @@
   }
 
   /* ---------------- sidebar ---------------- */
-  aside{ background:var(--ink); color:var(--side-text); padding:11mm 7mm 9mm; }
+  aside{ background:var(--ink); color:var(--side-text); padding:13mm 7mm; }
   .name{
     font-size:23pt; font-weight:700; line-height:1.05;
     color:#f2ede6; text-align:center; letter-spacing:-.01em;
@@ -62,7 +62,7 @@
     margin:0 0 3mm; font-size:7.4pt; font-weight:700;
     letter-spacing:.15em; text-transform:uppercase; color:var(--accent);
   }
-  aside h2:not(:first-of-type){ margin-top:5.5mm; }
+  aside h2:not(:first-of-type){ margin-top:7mm; }
   .contact{ list-style:none; margin:0; padding:0; }
   .contact li{ display:flex; gap:2.6mm; align-items:flex-start; margin-bottom:2.4mm; }
   .contact svg{ width:3.5mm; height:3.5mm; flex:none; margin-top:.5mm; stroke:var(--side-dim); }
@@ -70,10 +70,10 @@
   .contact a{ color:inherit; text-decoration:none; word-break:break-all; }
 
   .profile{ margin:0; color:var(--side-text); }
-  .skill{ margin:0 0 2.2mm; }
+  .skill{ margin:0 0 2.8mm; }
   .skill b{ color:#e8e1d7; font-weight:600; }
   .skill .k{ color:var(--accent); font-weight:600; }
-  .skill.lead b{ margin-right:1mm; }
+  .skill.lead b{ display:block; margin-bottom:.8mm; }
   .langs{ margin:0; }
   aside code, main code{
     font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -82,15 +82,15 @@
   aside code{ color:var(--accent); }
 
   /* ---------------- main ---------------- */
-  main{ padding:11mm 10mm 9mm 9mm; }
+  main{ padding:13mm 10mm 13mm 9mm; }
   main h2{
     margin:0 0 3mm; padding-bottom:1.6mm;
     border-bottom:1.1px solid var(--rule);
     font-size:13pt; font-weight:700; color:var(--accent);
   }
-  main h2:not(:first-child){ margin-top:4.4mm; }
+  main h2:not(:first-child){ margin-top:5.4mm; }
 
-  .item{ margin-bottom:2.6mm; }
+  .item{ margin-bottom:3.5mm; }
   .item:last-child{ margin-bottom:0; }
   .top{ display:flex; justify-content:space-between; align-items:baseline; gap:4mm; }
   .what{ font-size:10.2pt; font-weight:700; color:var(--ink); }
@@ -153,20 +153,19 @@
     </ul>
 
     <h2>Profile</h2>
-    <p class="profile">I build the layer underneath the agent — turn loops, tool dispatch,
-    sandboxing, and state that survives a restart. I don't train models; the LLM is a black box
-    I call, and the engineering around that call is what I own.</p>
+    <p class="profile">I build AI agents end to end — the turn loop, the memory, the tools,
+    and the interface. Luna is a complete agent product shipped solo; agent-kernel is the
+    reusable runtime extracted from it.</p>
 
     <h2>Core Skills</h2>
-    <p class="skill lead"><b>Runtime &amp; scheduling</b>State-machine turn loops · multi-agent
-    async scheduling · three-state concurrency · checkpointed long-horizon state · full-turn tracing.</p>
-    <p class="skill lead"><b>Execution &amp; isolation</b>Zod-first runtime validation at the tool
-    boundary · timeouts and abort signals · capability sandboxing · SSRF-guarded fetch.</p>
-    <p class="skill lead"><b>Production</b>Strongly-typed full-stack TS · a shared wire contract
-    that fails at compile time · fault tolerance · default-off flags for risky features.</p>
-    <p class="skill"><span class="k">Code</span> — TypeScript · Python · C++ · Go</p>
-    <p class="skill"><span class="k">Runtime</span> — Bun · Node · Electron · SQLite · WebSocket · MCP · Docker</p>
-
+    <p class="skill lead"><b>AI-assisted development</b>Directing coding agents through
+    spec&nbsp;→ review&nbsp;→ test&nbsp;→ ship. Everything above was built this way —
+    Luna's 215 releases each carry a written rationale.</p>
+    <p class="skill"><span class="k">Agent</span> — turn loops · tool dispatch &amp; concurrency ·
+    layered memory · MCP · prompt engineering</p>
+    <p class="skill"><span class="k">Code</span> — TypeScript · Python · C++ · JavaScript</p>
+    <p class="skill"><span class="k">Runtime</span> — Bun · Node · Electron · SQLite · WebSocket</p>
+    <p class="skill"><span class="k">Tools</span> — Git · Docker</p>
 
     <h2>Languages</h2>
     <p class="langs">Chinese (native) · English (fluent — working language)<br><b>Convention de stage</b> available</p>
@@ -179,50 +178,34 @@
 
     <div class="item">
       <div class="top">
-        <div class="what">agent-kernel <span class="light">— persona-free agent runtime · solo</span></div>
-      </div>
-      <div class="meta">TypeScript ·
-        <a href="https://github.com/Alan-Yu-2077/agent-kernel">[GitHub]</a>
-      </div>
-      <ul class="pts">
-        <li><b>Turn engine:</b> a generic StateGraph loop (parse → build → stream → dispatch →
-        append → finalize) driving streamed turns with interleaved tool use, bounded at eight
-        tool iterations.</li>
-        <li><b>Tool kernel:</b> Zod-first <code>defineTool</code> factory and typed registry;
-        dispatcher with three-state concurrency (safe-parallel / session-serial / global-serial),
-        per-tool timeouts, abort discipline and a unified <code>Result&lt;T&gt;</code>.</li>
-      </ul>
-    </div>
-
-    <div class="item">
-      <div class="top">
-        <div class="what">Luna <span class="light">— long-running desktop agent · solo</span></div>
+        <div class="what">Luna <span class="light">— desktop AI companion · solo</span></div>
       </div>
       <div class="meta">Python prototype → TypeScript rewrite ·
         <a href="https://github.com/Alan-Yu-2077/Luna">[GitHub]</a>
         <a href="https://alan-yu-2077.github.io/Luna/">[Demo]</a>
       </div>
+      <p class="lede">Owned solo from product definition to release.</p>
       <ul class="pts">
-        <li><b>Durable state:</b> three memory layers over one SQLite file with hybrid recall and
-        a relevance floor; an offline pass distills each day into durable facts and reusable
-        skills, so a restart loses nothing.</li>
-        <li><b>Isolation:</b> capability sandbox with canonicalized paths and an evaluator
-        firewall — the agent may read the tests and configs that gate it, never write them;
-        SSRF-guarded fetch, origin-checked transport.</li>
-        <li><b>Contract:</b> one Zod-typed WebSocket protocol shared by server and client — an
-        unmirrored wire change is a compile error. 215 releases in seven weeks, each logged.</li>
+        <li><b>Memory:</b> three layers over one SQLite file, hybrid recall blending embeddings,
+        keywords and recency, and a nightly dream cycle that distills the day into facts, diary
+        and reusable skills.</li>
+        <li><b>Embodiment:</b> Live2D avatar with emotion-driven expression, phoneme lip-sync and
+        a cloned voice.</li>
+        <li><b>Engineering:</b> Bun monorepo behind one Zod-typed WebSocket contract — a wire change
+        not mirrored on both sides is a compile error. 215 releases in seven weeks, each logged.</li>
       </ul>
     </div>
 
     <div class="item">
       <div class="top">
-        <div class="what">holdem-arena <span class="light">— multi-agent scheduling · solo</span></div>
+        <div class="what">agent-kernel <span class="light">— reusable agent core · solo</span></div>
       </div>
-      <div class="meta">TypeScript</div>
+      <div class="meta">TypeScript ·
+        <a href="https://github.com/Alan-Yu-2077/agent-kernel">[GitHub]</a>
+      </div>
       <ul class="pts">
-        <li>N agents act at one table under contention — turn order, per-seat hidden state and
-        two-channel output are the scheduler's problem. Built on agent-kernel: a second product
-        off the same core.</li>
+        <li>The persona-free kernel extracted from Luna: StateGraph turn loop, Zod-first tool
+        registry with three-state concurrency, provider abstraction, full-turn tracing.</li>
       </ul>
     </div>
 
