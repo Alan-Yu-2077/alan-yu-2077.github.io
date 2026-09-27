@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>wip: alan.yu (initial commit)</title><!-- homage: terminal.shop -->
+<title>alan.yu — terminal</title>
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
 <style>
   /* themes */
   :root, body[data-theme="dark"]{
@@ -95,8 +96,8 @@
 'use strict';
 
 /* =====================================================================
- * terminal-style personal site prototype
- * nods: terminal.shop (title), LiveTerm/satnaing (command UX),
+ * the site as a shell
+ * nods: terminal.shop (tone), LiveTerm/satnaing (command UX),
  * charm (theme), a1k0n donut, Rezmason matrix (see `matrix` output)
  * ===================================================================== */
 
@@ -186,24 +187,28 @@ function printBig(word, cls) {
 }
 function printBanner() {
   printBig('ALAN·YU');
-  out('v0.1 · wip: initial commit', 'dim');
+  out('agent infrastructure engineer · paris', 'dim');
 }
 
 /* ---------- fake filesystem ---------- */
 const FS = {
   'resume.txt': [
-    'alan yu',
-    '────────',
-    '3d · blender · web experiments',
+    'alan yu — agent infrastructure engineer',
+    '───────────────────────────────────────',
+    'luna            ai companion, solo · 260+ versions',
+    'agent-kernel    the runtime extracted from luna',
+    'open source     airi #2066 #2006 · velin #49',
+    'bytedance       campus partner lead, 2025',
+    'education       epita paris · chang\'an university',
     '',
-    '(placeholder — put the real thing here,',
-    ' or wire this to a real resume.pdf)',
+    'the full thing: ./resume.html',
   ],
   'todo.txt': [
+    '[x] luna — every version logged',
+    '[x] agent-kernel',
     '[x] ascii playground (11 scenes)',
-    '[x] naked-eye 3d ALAN',
-    '[x] terminal prototype',
-    '[ ] actual content, lol',
+    '[x] this terminal',
+    '[ ] a 2026 internship in paris   ← `contact`',
   ],
   '.secrets/donut.c': ['nice find. but just run `donut` :)'],
   '.secrets/matrix.txt': ['the properly-done rain: https://rezmason.github.io/matrix/'],
@@ -336,31 +341,37 @@ cmd('help', 'list commands', () => {
 
 cmd('about', 'who is this', () => {
   blank();
-  out('alan yu — 3d & web experiments');
-  out('currently: building this site, one character at a time');
-  outHTML('stack of the month: blender · three.js · <span class="dim">(edit me in terminal.html)</span>');
+  out('alan yu — agent infrastructure engineer, paris');
+  out('i build ai agents end to end: the turn loop, the memory, the tools, the face.');
+  out('currently: bsc computer science at epita. looking for a 2026 internship in');
+  out('paris — english-speaking team, convention de stage provided.');
   blank();
 });
 
 cmd('projects', 'selected work', () => {
   blank();
   box([
-    '01  ascii playground     11 realtime scenes',
-    '    plasma·donut·flow·type + 5 ALAN 3d pieces',
-    '    → run `play` (or `play 7` for a scene)',
+    '01  luna           desktop ai companion',
+    '    memory · dreams · live2d · cloned voice',
     '',
-    '02  naked-eye 3d ALAN    voxel text, window trick',
-    '    off-axis parallax + z-buffer occlusion',
+    '02  agent-kernel   luna minus the persona',
+    '    stategraph loop · zod tools · tracing',
     '',
-    '03  (next project here)  placeholder',
+    '03  playground     11 realtime ascii scenes',
+    '    → `play`, or `play 8` for the wordmark',
   ]);
+  outHTML('  <span class="dim">source</span> <a href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">luna</a>'
+        + ' · <a href="https://github.com/Alan-Yu-2077/agent-kernel" target="_blank" rel="noreferrer">agent-kernel</a>'
+        + '   <span class="dim">demo</span> <a href="https://alan-yu-2077.github.io/Luna/" target="_blank" rel="noreferrer">luna tv</a>');
   blank();
 });
 
 cmd('contact', 'say hi', () => {
   blank();
   outHTML('  mail    <a href="mailto:yualan077@gmail.com">yualan077@gmail.com</a>');
-  outHTML('  github  <span class="dim">(add yours in terminal.html)</span>');
+  outHTML('  github  <a href="https://github.com/Alan-Yu-2077" target="_blank" rel="noreferrer">github.com/Alan-Yu-2077</a>');
+  outHTML('  résumé  <a href="./resume.html" target="_blank" rel="noreferrer">resume.html</a>'
+        + ' <span class="dim">·</span> <a href="./alan-yu-resume.pdf" target="_blank" rel="noreferrer">pdf</a>');
   blank();
 });
 
@@ -384,7 +395,7 @@ cmd('crt', 'toggle scanlines', () => {
 
 cmd('play', 'open the ascii playground (play [1-11])', args => {
   const n = parseInt(args[0], 10);
-  const url = 'index.html' + (n >= 1 && n <= 11 ? '#s=' + n : '');
+  const url = 'playground.html' + (n >= 1 && n <= 11 ? '#s=' + n : '');
   out('launching playground… (browser back returns here)', 'dim');
   setTimeout(() => { location.href = url; }, 350);
 });
@@ -417,8 +428,9 @@ cmd('cat', '', args => {
   const key = args[0].replace(/^\.\//, '');
   const hit = FS[key] || FS['.secrets/' + key];
   if (!hit) { out('cat: no such file: ' + args[0]); return; }
-  blank(); hit.forEach(l => /https?:\/\//.test(l)
-    ? outHTML(esc(l).replace(/(https?:\/\/\S+)/, '<a href="$1" target="_blank" rel="noreferrer">$1</a>'))
+  const LINK = /(https?:\/\/\S+|\.\/\S+)/;     // absolute URLs and ./site-relative paths
+  blank(); hit.forEach(l => LINK.test(l)
+    ? outHTML(esc(l).replace(LINK, '<a href="$1" target="_blank" rel="noreferrer">$1</a>'))
     : out(l));
   blank();
 }, true);

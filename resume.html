@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alan Yu · Résumé</title>
 <meta name="description" content="Alan Yu — Agent Infrastructure Engineer. Résumé.">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
 <style>
   /* ---------------------------------------------------------------
      Palette lifted from the previous résumé: warm near-black sidebar,
@@ -115,11 +116,24 @@
   .tags{ margin:1.6mm 0 0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:1.4mm; }
   .tags li{ background:var(--pill); border-radius:2px; padding:.7mm 2mm; font-size:7.8pt; color:#4b463f; }
 
+  /* ---------------- phones ---------------- */
+  /* One column, sidebar on top: at 210mm the page is ~794px wide, so on a phone
+     the main column was cut off. Screen only — print keeps the A4 grid. */
+  @media screen and (max-width:820px){
+    body{ background:var(--paper); font-size:10.5pt; }
+    .page{ width:auto; min-height:0; margin:0; display:block; box-shadow:none; }
+    aside{ padding:9mm 6mm 7mm; }
+    main{ padding:8mm 6mm 12mm; }
+    .top{ flex-wrap:wrap; column-gap:3mm; }
+  }
+
   /* ---------------- print ---------------- */
   @page{ size:A4; margin:0; }
   @media print{
     body{ background:none; }
-    .page{ margin:0; box-shadow:none; width:auto; min-height:0; }
+    /* Keep the full sheet height: letting .page shrink to its content ended the
+       dark sidebar ~20mm short of the bottom edge. */
+    .page{ margin:0; box-shadow:none; width:auto; min-height:297mm; }
     a{ color:inherit; }
   }
   html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -147,6 +161,10 @@
         <a href="https://github.com/Alan-Yu-2077">github.com/Alan-Yu-2077</a>
       </li>
       <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <a href="https://alan-yu-2077.github.io/">alan-yu-2077.github.io</a>
+      </li>
+      <li>
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         <span>Paris, France</span>
       </li>
@@ -160,7 +178,7 @@
     <h2>Core Skills</h2>
     <p class="skill lead"><b>AI-assisted development</b>Directing coding agents through
     spec&nbsp;→ review&nbsp;→ test&nbsp;→ ship. Everything above was built this way —
-    Luna's 215 releases each carry a written rationale.</p>
+    each of Luna's 260+ versions carries a written rationale.</p>
     <p class="skill"><span class="k">Agent</span> — turn loops · tool dispatch &amp; concurrency ·
     layered memory · MCP · prompt engineering</p>
     <p class="skill"><span class="k">Code</span> — TypeScript · Python · C++ · JavaScript</p>
@@ -192,7 +210,8 @@
         <li><b>Embodiment:</b> Live2D avatar with emotion-driven expression, phoneme lip-sync and
         a cloned voice.</li>
         <li><b>Engineering:</b> Bun monorepo behind one Zod-typed WebSocket contract — a wire change
-        not mirrored on both sides is a compile error. 215 releases in seven weeks, each logged.</li>
+        not mirrored on both sides is a compile error. 260+ versions since June 2026,
+        <a href="https://github.com/Alan-Yu-2077/Luna/blob/main/docs/history/DEVELOPMENT.md">each logged</a>.</li>
       </ul>
     </div>
 
@@ -213,14 +232,14 @@
 
     <div class="item">
       <div class="top">
-        <div class="what">moeru-ai/airi <span class="light">— 46k ★ · 2 PRs merged</span></div>
+        <div class="what">moeru-ai/airi <span class="light">— ~50k ★ · 2 PRs merged</span></div>
         <div class="when">2026.06 – present</div>
       </div>
       <ul class="pts">
         <li>Lifted Luna's web layer out and reshaped it for airi's stage-ui
         (<a href="https://github.com/moeru-ai/airi/pull/2066">#2066</a>); fixed a
         background-process leak in their computer-use MCP
-        (<a href="https://github.com/moeru-ai/airi/pull/2006">#2006</a>). Two more in review.</li>
+        (<a href="https://github.com/moeru-ai/airi/pull/2006">#2006</a>).</li>
       </ul>
     </div>
 

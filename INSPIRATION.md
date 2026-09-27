@@ -47,5 +47,5 @@
 
 ## 本仓库对这些资源的消化
 
-- `index.html` — play.core 思路的自研逐格渲染 playground（①-1 / ② 8·12）
+- `playground.html` — play.core 思路的自研逐格渲染 playground（①-1 / ② 8·12）
 - `terminal.html` — 终端风个人站原型：命令导航 + 主题 + 彩蛋（② 10·12 / ③ 14-16 手感清单 / ①-2·3 气质）

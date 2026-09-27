@@ -3,8 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alan Yu</title>
+<title>Alan Yu — Agent Infrastructure Engineer</title>
 <meta name="description" content="Alan Yu — Agent Infrastructure Engineer. Runtimes, schedulers and sandboxes for LLM agents. Seeking a 2026 internship in Paris.">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+<!-- link previews (LinkedIn, Slack, WeChat…) — og:url and og:image must be absolute -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Alan Yu">
+<meta property="og:title" content="Alan Yu — Agent Infrastructure Engineer">
+<meta property="og:description" content="I build AI agents end to end — the turn loop, the memory, the tools and the face. Looking for a 2026 internship in Paris.">
+<meta property="og:url" content="https://alan-yu-2077.github.io/">
+<meta property="og:image" content="https://alan-yu-2077.github.io/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ALAN YU in voxel ASCII — Agent Infrastructure Engineer, Paris">
+<meta name="twitter:card" content="summary_large_image">
 <!-- Layout after brittanychiang.com (Brittany Chiang), rebuilt by hand.
      No framework, no build step, no dependencies. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,7 +134,7 @@
      paperwork question that otherwise kills a foreign application on sight. */
   .avail{
     margin-top:16px; max-width:20rem;
-    font-size:13px; line-height:1.5; color:var(--dim);
+    font-size:13px; line-height:1.5; color:var(--text);   /* --dim is 3.75:1 here, under AA */
     border-left:2px solid var(--accent); padding-left:12px;
   }
   .avail strong{ color:var(--accent); font-weight:600; }
@@ -186,7 +199,7 @@
       overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;   /* sr-only on desktop */
     }
   }
-  .sticky-head h3{
+  .sticky-head h2{
     font-size:14px; font-weight:700;
     letter-spacing:.1em; text-transform:uppercase;
     color:var(--head);
@@ -211,12 +224,15 @@
     color:var(--head); margin-bottom:8px;
   }
   .stack dd{ margin:0; font-size:14px; line-height:1.6; }
-  .stack .also{
+  /* The two notes sit after the <dl>, not inside it, so `.stack .also` never
+     matched and they rendered at full body size. --text rather than --dim:
+     at 13px --dim is under 4.5:1. */
+  #stack .also{
     margin-top:32px; padding-top:20px; border-top:1px solid rgba(148,163,184,.14);
-    font-size:13px; color:var(--dim);
+    font-size:13px; color:var(--text);
   }
-  .stack .also + .also{ margin-top:12px; padding-top:0; border-top:0; }
-  .stack .also strong{ color:var(--text); font-weight:600; }
+  #stack .also + .also{ margin-top:12px; padding-top:0; border-top:0; }
+  #stack .also strong{ color:var(--head); font-weight:600; }
 
   /* rows (experience & projects) */
   .rows > li + li{ margin-top:48px; }
@@ -326,6 +342,8 @@
   .more a .arrow{ width:16px; height:16px; margin-left:6px; }
   .more a:hover{ color:var(--accent); }
   .more a:hover .arrow{ transform:translate(3px,-3px); }
+  .more a.pdf{ margin-left:20px; font-size:13px; color:var(--dim); }
+  .more a.pdf:hover{ color:var(--accent); }
 
   footer{ max-width:28rem; padding-bottom:64px; }
   footer p{ font-size:14px; color:var(--dim); }
@@ -344,8 +362,8 @@
     <!-- ============ left / header ============ -->
     <header>
       <div>
-        <h1><a href="./home.html"><span class="txt">Alan Yu</span><canvas id="titlefx" aria-hidden="true"></canvas></a></h1>
-        <h2 class="role">Agent Infrastructure Engineer</h2>
+        <h1><a href="./index.html"><span class="txt">Alan Yu</span><canvas id="titlefx" aria-hidden="true"></canvas></a></h1>
+        <p class="role">Agent Infrastructure Engineer</p>
         <p class="tagline">I design and build AI products end to end — from the turn loop
         to the face. I build agents shaped to the problem, not to the framework.</p>
         <p class="avail">Looking for a 2026 internship in Paris · English-speaking team ·
@@ -357,6 +375,7 @@
             <li><a class="navlink" href="#stack"><span class="ind"></span><span class="navtext">Stack</span></a></li>
             <li><a class="navlink" href="#experience"><span class="ind"></span><span class="navtext">Experience</span></a></li>
             <li><a class="navlink" href="#projects"><span class="ind"></span><span class="navtext">Projects</span></a></li>
+            <li><a class="navlink" href="#education"><span class="ind"></span><span class="navtext">Education</span></a></li>
           </ul>
         </nav>
       </div>
@@ -365,12 +384,6 @@
         <ul class="socials" aria-label="Social media">
         <li><a href="https://github.com/Alan-Yu-2077" target="_blank" rel="noreferrer" aria-label="GitHub">
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-        </a></li>
-        <li><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn (placeholder)">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg>
-        </a></li>
-        <li><a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram (placeholder)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>
         </a></li>
         <li><a href="mailto:yualan077@gmail.com" aria-label="Email">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -384,7 +397,7 @@
     <main id="content">
 
       <section id="about" aria-label="About me">
-        <div class="sticky-head"><h3>About</h3></div>
+        <div class="sticky-head"><h2>About</h2></div>
         <div class="section-body">
           <p>I build things that feel like someone's there.
           <a class="hl" href="https://github.com/Alan-Yu-2077/Luna" target="_blank" rel="noreferrer">Luna</a>
@@ -396,47 +409,69 @@
           a stroke still reads solid. The character field behind this text thins out wherever there
           are words to read. Nobody would have noticed if I'd skipped either one.</p>
           <p>I build with AI in the loop and I'm not quiet about it — but every version I ship
-          carries a written note on what changed and why, including the ones that were wrong.
+          carries <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/main/docs/history/DEVELOPMENT.md" target="_blank" rel="noreferrer">a written note on what changed and why</a>,
+          including the ones that were wrong.
           Going fast and knowing exactly what you shipped are the same discipline. I also fix
           other people's things — including
           <a class="hl" href="https://github.com/moeru-ai/airi" target="_blank" rel="noreferrer">airi</a>,
-          the closest thing Luna has to a rival and some 46,000 stars ahead of her. It's all MIT.
+          the closest thing Luna has to a rival and some 50,000 stars ahead of her. It's all MIT.
           Take what's useful.</p>
         </div>
       </section>
 
       <section id="stack" aria-label="Technical focus">
-        <div class="sticky-head"><h3>Stack</h3></div>
+        <div class="sticky-head"><h2>Stack</h2></div>
         <div class="section-body">
           <dl class="stack">
             <div class="grp">
               <dt>Agent runtime &amp; scheduling</dt>
-              <dd>State-machine turn loops with bounded tool iteration · three-state
-              concurrency (safe-parallel /
-              session-serial / global-serial) · long-horizon state persisted to SQLite and
-              resumed from checkpoint · proactive behaviour on deterministic rails rather
-              than timers · full-turn tracing and replay.</dd>
+              <!-- Every link below is pinned to a commit, so it keeps pointing at the
+                   code that backs the claim even as the repos move on. -->
+              <dd><a class="hl" href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/turn/runTurn.ts#L187-L198" target="_blank" rel="noreferrer">State-machine turn loops</a>
+              with bounded tool iteration ·
+              <a class="hl" href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/tools/dispatcher.ts#L29-L64" target="_blank" rel="noreferrer">three-state concurrency</a>
+              (safe-parallel / session-serial / global-serial) ·
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/memory/sessionStore.ts#L24-L42" target="_blank" rel="noreferrer">conversation state persisted to SQLite</a>
+              and rebuilt on restart · proactive behaviour gated by
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/proactive/cadence.ts#L68-L98" target="_blank" rel="noreferrer">deterministic rails</a>
+              — quiet hours, idle floor, cooldown, quota ·
+              <a class="hl" href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/turn/runTurn.ts#L259-L294" target="_blank" rel="noreferrer">full-turn tracing</a>
+              with a <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/trace/viewer.ts#L14-L36" target="_blank" rel="noreferrer">local timeline viewer</a>.</dd>
             </div>
             <div class="grp">
               <dt>Tool execution &amp; isolation</dt>
-              <dd>Runtime type validation at the tool boundary (Zod-first registry, no
-              <code>as</code>) · per-tool timeouts, abort signals and a unified
-              <code>Result&lt;T&gt;</code> · capability sandboxing with canonicalized paths and
-              an evaluator firewall over the files that gate the agent · SSRF-guarded
-              outbound fetch · origin-checked transport, loopback by default.</dd>
+              <dd><a class="hl" href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/tools/dispatcher.ts#L99-L103" target="_blank" rel="noreferrer">Zod validation</a>
+              of every tool call's input and output ·
+              <a class="hl" href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/tools/dispatcher.ts#L112-L147" target="_blank" rel="noreferrer">per-tool timeouts and abort signals</a>,
+              and one ok/err
+              <a class="hl" href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/protocol/src/tools.ts#L15-L29" target="_blank" rel="noreferrer"><code>ToolResult</code></a>
+              · path guards that
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/tools/workspace.ts#L243-L286" target="_blank" rel="noreferrer">canonicalize before every check</a>,
+              and an
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/tools/workspace.ts#L141-L172" target="_blank" rel="noreferrer">evaluator firewall</a>
+              over the files that gate the agent ·
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/tools/web/safeFetch.ts#L315-L356" target="_blank" rel="noreferrer">SSRF-guarded outbound fetch</a>,
+              pinned to the checked IP ·
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/main.ts#L313-L322" target="_blank" rel="noreferrer">origin-checked transport</a>,
+              loopback by default.</dd>
             </div>
             <div class="grp">
               <dt>Production engineering</dt>
-              <dd>Strongly-typed full-stack TypeScript · one Zod-typed wire contract shared by
-              server and client, so an unmirrored change is a compile error · fault-tolerant
-              recovery and async event-loop decoupling · every risky feature behind a
-              default-off flag before its default flips · a written rationale per release.</dd>
+              <dd>Strongly-typed full-stack TypeScript ·
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/protocol/src/events.ts#L235-L251" target="_blank" rel="noreferrer">one Zod-typed wire contract</a>
+              shared by server and client, so an unmirrored change is
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/web/src/controller.ts#L284-L296" target="_blank" rel="noreferrer">a compile error</a>
+              · a
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/desktop/src/supervisor.ts#L117-L146" target="_blank" rel="noreferrer">supervisor</a>
+              that restarts a crashed backend · every risky feature behind a default-off flag
+              before its default flips ·
+              <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/main/docs/history/DEVELOPMENT.md" target="_blank" rel="noreferrer">a written rationale per release</a>.</dd>
             </div>
           </dl>
           <p class="also"><strong>Going deeper on</strong> — multi-agent scheduling under contention,
           stronger isolation boundaries for tool execution (MicroVM and Wasm runtimes),
           distributed scheduling across agent workers, and durable execution / workflow-replay engines. Direction, not shipped
-          work — the sandboxing above is in-process.</p>
+          work — the isolation above is in-process.</p>
           <p class="also"><strong>Languages &amp; runtime</strong> — TypeScript (strict) · Python ·
           C++ · Go · Bun · Node · Electron · SQLite · WebSocket · MCP · Anthropic &amp;
           OpenAI-compatible providers · Git · Docker</p>
@@ -444,33 +479,19 @@
       </section>
 
       <section id="experience" aria-label="Work experience">
-        <div class="sticky-head"><h3>Experience</h3></div>
+        <div class="sticky-head"><h2>Experience</h2></div>
         <div class="section-body">
           <ol class="rows">
-            <li>
-              <div class="row">
-                <div class="date">2026 — Present</div>
-                <div class="rbody">
-                  <h3><a href="https://www.epita.fr/" target="_blank" rel="noreferrer">BSc Computer Science ·
-                    <span class="co">EPITA, Paris</span>
-                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
-                  </a></h3>
-                  <p class="desc">The Paris year of a Sino-French 3+1 joint programme.
-                  I'm in Paris now, looking for internships across France and the EU.</p>
-                  <ul class="tags"><li>Paris</li><li>Available</li></ul>
-                </div>
-              </div>
-            </li>
             <li>
               <div class="row">
                 <div class="date">Jun 2026 — Present</div>
                 <div class="rbody">
                   <h3><a href="https://github.com/moeru-ai/airi" target="_blank" rel="noreferrer">Open-source contributor ·
-                    <span class="co">airi (46k★), velin</span>
+                    <span class="co">airi (~50k★), velin</span>
                     <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
                   </a></h3>
-                  <p class="desc">airi is a desktop AI companion much like Luna — and about 46,000
-                  stars ahead of it. Users kept asking why the character couldn't look things up
+                  <p class="desc">airi is a desktop AI companion much like Luna. Users kept asking
+                  why the character couldn't look things up
                   online, so I lifted the web layer out of Luna, reshaped it for airi's stage-ui,
                   and <a class="hl" href="https://github.com/moeru-ai/airi/pull/2066" target="_blank" rel="noreferrer">shipped it</a>.
                   Also fixed a <a class="hl" href="https://github.com/moeru-ai/airi/pull/2006" target="_blank" rel="noreferrer">background-process
@@ -499,27 +520,14 @@
               <div class="row">
                 <div class="date">Oct 2024 — Feb 2025</div>
                 <div class="rbody">
-                  <h3>Data Engineer, AI Counselor ·
-                    <span class="co">Yiban Dev Group, Chang'an University</span>
+                  <h3>Technical Intern ·
+                    <span class="co">E-class, Chang'an University</span>
                   </h3>
                   <p class="desc">Selected 1 of 12 — <a class="hl" href="https://github.com/Alan-Yu-2077/CHU_E-class_interviewtask" target="_blank" rel="noreferrer">the interview tasks are still up</a>.
-                  Data collection, cleaning and ingestion for a campus RAG assistant. Working next
+                  Data collection, cleaning and ingestion for AI Counselor, a campus RAG assistant. Working next
                   to the team's engineers is where I first saw how an agent is actually put
                   together — the starting point for everything under Projects.</p>
                   <ul class="tags"><li>Python</li><li>Selenium</li><li>RAG</li><li>Data pipelines</li></ul>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div class="row">
-                <div class="date">2023 — 2026</div>
-                <div class="rbody">
-                  <h3>BEng Artificial Intelligence ·
-                    <span class="co">Chang'an University</span>
-                  </h3>
-                  <p class="desc">The first three years of the 3+1, in Xi'an. Everything under
-                  Projects was built alongside coursework, on my own time.</p>
-                  <ul class="tags"><li>Xi'an</li></ul>
                 </div>
               </div>
             </li>
@@ -528,12 +536,13 @@
             <a href="./resume.html" target="_blank" rel="noreferrer">View Full Résumé
               <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
             </a>
+            <a class="pdf" href="./alan-yu-resume.pdf" target="_blank" rel="noreferrer">PDF</a>
           </div>
         </div>
       </section>
 
       <section id="projects" aria-label="Selected projects">
-        <div class="sticky-head"><h3>Projects</h3></div>
+        <div class="sticky-head"><h2>Projects</h2></div>
         <div class="section-body">
           <ul class="rows">
             <li>
@@ -546,10 +555,13 @@
                     <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
                   </a></h3>
                   <p class="desc">She remembers across months, opens conversations herself, and has
-                  a face. Three layers of memory over one SQLite file with hybrid recall, and a
-                  nightly dream cycle that distills the day into facts, a diary, and skills she
-                  keeps for herself. Live2D avatar, phoneme lip-sync, and a cloned voice you
-                  install without ever opening a terminal — all behind a single Zod-typed
+                  a face. Three layers of memory over one SQLite file with
+                  <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/memory/recall/recall.ts#L249-L275" target="_blank" rel="noreferrer">hybrid recall</a>,
+                  and a nightly
+                  <a class="hl" href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/dream/cycle.ts#L66-L98" target="_blank" rel="noreferrer">dream cycle</a>
+                  that distills the day into facts, a diary, and skills she
+                  keeps for herself. Live2D avatar, phoneme lip-sync, and a cloned voice you can
+                  set up without ever opening a terminal — all behind a single Zod-typed
                   WebSocket contract.</p>
                   <ul class="tags"><li>TypeScript</li><li>Bun</li><li>Electron</li><li>SQLite</li><li>Live2D</li><li>Anthropic API</li></ul>
                   <p class="links">
@@ -577,10 +589,47 @@
         </div>
       </section>
 
+      <section id="education" aria-label="Education">
+        <div class="sticky-head"><h2>Education</h2></div>
+        <div class="section-body">
+          <ol class="rows">
+            <li>
+              <div class="row">
+                <div class="date">2026 — Present</div>
+                <div class="rbody">
+                  <h3><a href="https://www.epita.fr/" target="_blank" rel="noreferrer">BSc Computer Science ·
+                    <span class="co">EPITA, Paris</span>
+                    <svg class="arrow" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 0 1.06 0l7.22-7.22v5.69a.75.75 0 0 0 1.5 0v-7.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h5.69l-7.22 7.22a.75.75 0 0 0 0 1.06z" clip-rule="evenodd"/></svg>
+                  </a></h3>
+                  <p class="desc">The Paris year of a Sino-French 3+1 joint programme.
+                  I'm in Paris now, looking for internships across France and the EU.</p>
+                  <ul class="tags"><li>Paris</li><li>Available</li></ul>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="row">
+                <div class="date">2023 — 2026</div>
+                <div class="rbody">
+                  <h3>BEng Artificial Intelligence ·
+                    <span class="co">Chang'an University</span>
+                  </h3>
+                  <p class="desc">The first three years of the 3+1, in Xi'an. Everything under
+                  Projects was built alongside coursework, on my own time.</p>
+                  <ul class="tags"><li>Xi'an</li></ul>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
       <footer>
         <p>Layout study after <a href="https://brittanychiang.com" target="_blank" rel="noreferrer">brittanychiang.com</a>
         (Brittany Chiang) — rebuilt by hand as the skeleton for this site. No framework, no
-        build step, no dependencies; the ASCII layers are my own.</p>
+        build step, no dependencies; the ASCII layers are my own. Eleven more of them run in
+        the <a href="./playground.html">playground</a>, and the whole site runs as a
+        <a href="./terminal.html">shell</a>.</p>
       </footer>
 
     </main>
@@ -599,15 +648,16 @@ window.addEventListener('mousemove', e => {
 });
 
 /* ascii layer — two pieces:
- *   1. a full-bleed character field (7×10px cells) running a drifting plasma.
+ *   1. a full-bleed character field (8×11px cells) running a drifting plasma.
  *      The cursor pushes a wave through it, clicks send expanding rings. It is
  *      kept legible by an attenuation grid: wherever real text sits, the field
- *      thins and dims to ~25%, so it reads bright in the margins and vanishes
- *      under paragraphs.
+ *      thins and drops to 20% brightness, so it reads in the margins and all but
+ *      vanishes under paragraphs.
  *   2. the wordmark: "ALAN YU" extruded from the 5×7 dot-matrix font into a
- *      voxel cloud, perspective-projected with a z-buffer, swaying slowly and
- *      parallaxing to the cursor.
- * ?bg=off removes both · ?bg=static freezes them (also on reduced-motion/touch) */
+ *      voxel slab, perspective-projected with a z-buffer. It holds face-on, then
+ *      makes one quick full turn, with a slow pitch/roll wobble throughout.
+ * ?bg=off removes both · ?bg=static and reduced motion freeze both · touch
+ * freezes only the field (it is pointer-driven; the wordmark keeps turning) */
 (() => {
   const bgCanvas = document.getElementById('bgfx');
   const titleCanvas = document.getElementById('titlefx');
@@ -768,9 +818,9 @@ window.addEventListener('mousemove', e => {
   // into one ridge at atan(gap/DEPTH) — 42° here, versus 18° at gap 1 / depth 3.
   // 42 units long, and the whole length swings through z as the word turns: at
   // D=24 the near end passes within 5.5 units of the lens, so letters coming
-  // toward you balloon and clip through the edge-on moment. `spin` tumbles fast
-  // enough (7s a revolution) that it reads as a whip-past rather than a defect,
-  // and `f` refits every frame so the mark never changes size.
+  // toward you balloon and clip through the edge-on moment. The turn is quick
+  // (SPIN below, eased) so that reads as a whip-past rather than a defect, and
+  // `f` refits every frame so the mark never changes size.
   const WORD = 'ALAN YU', ADV = 7, SPACE_ADV = 2, SUB = 4, ZS = 4, DEPTH = 2.1;
   // Lay the letters out along a cursor rather than on a fixed grid, so the word
   // space can be narrower than a whole letter advance — a blank cell's worth of
@@ -783,33 +833,20 @@ window.addEventListener('mousemove', e => {
     cur += ADV;
   }
   const wordW = cur - (ADV - 5);            // drop the trailing inter-letter gap
-  // smaller cells than the field's: the wordmark is physically smaller now, and
-  // shading detail needs cells per stroke more than it needs big glyphs
-  // Cell size is what gives the wordmark its weight — shrinking it to 4×6 to buy
-  // shading resolution made every character visibly thinner, which cost more than
-  // the extra detail was worth.
-  // Finer cells than the background field, and a font sized to *fit* them. An
-  // earlier pass rejected 4x6 believing it thinned the strokes — it doesn't, so
-  // long as the font isn't scaled down with the cell: a stroke that covered 1.6
-  // cells at 5x7 covers 2.1 at 4x6, and the letters read solid instead of
-  // skeletal. Measured: word 313→327px, columns across the word 81→101, mean ink
-  // 42.7→43.7. Keeping T_FONT at 9 here would look solid too, but every ramp
-  // glyph clips toward a filled block and the density ramp collapses — spatial
-  // detail bought at the cost of tonal detail. 7 fits the cell, so `.:-=+*#%@`
-  // stay distinguishable and the shading keeps its steps.
+  // Finer cells than the background field, and a font sized to *fit* them. 4×6
+  // cells don't thin the strokes as long as the font isn't scaled down with the
+  // cell: a stroke that covered 1.6 cells at 5×7 covers 2.1 at 4×6, and the
+  // letters read solid instead of skeletal (measured: word 313→327px, columns
+  // across the word 81→101, mean ink 42.7→43.7). Font 9 would look solid too,
+  // but every ramp glyph clips toward a filled block and the density ramp
+  // collapses — spatial detail bought with tonal detail. 7 fits the cell, so the
+  // ramp's ten steps stay distinguishable.
   const T_CW = 4, T_CH = 6, T_FONT = 7;
-  // a longer ramp and more alpha tiers: real normal lighting produces a
-  // continuous range of values, and coarse steps would band the bevel
   const T_RAMP = ' ·:;=+*#%@';           // RAMP3D, verbatim from the playground
   const T_TIERS = [0.10, 0.26, 0.42, 0.60, 0.80, 1];
-  // Build the slab as a surface shell with a real outward normal per voxel. A
-  // flat cap lit only by "how squarely it faces the camera" is uniformly bright
-  // head-on, which is exactly why the wordmark read flat at 0°; chamfering the
-  // cap where a stroke ends and lighting it directionally gives every stroke a
-  // bright edge and a shaded edge, so the letters look raised even face-on.
   // The playground's ALAN factory, verbatim: a solid voxel block (no surface
-  // shell, no normals, no mirrored back plate) whose only shading input is which
-  // z-layer a voxel sits on. `spin` needs nothing else.
+  // shell, no normals) whose shading comes only from which z-layer a voxel sits
+  // on and how near it is to the camera.
   const YS = 1.28;                          // vertical stretch
   const pts = [];
   for (const { g, x0 } of layout) {
@@ -825,12 +862,30 @@ window.addEventListener('mousemove', e => {
       }
     }
   }
-  // With a four-letter word the fit is height-limited, not width-limited, so
-  // pulling the camera in costs nothing at all: measured fitted width is a flat
-  // 243px from D=55 down to D=16, while the near/far ratio climbs 1.62× → 9.67×.
-  // 24 matches the playground's `spin` scene (3.4×) — past that the near end
-  // starts to bulge rather than taper.
-  const T_D = 24, T_ASP = T_CW / T_CH;
+  // Camera distance and depth offset, shared by the fit and the renderer. The
+  // fit is height-limited, so pulling the camera in costs little width and buys
+  // near/far taper; 24 matches the playground's `spin` scene — past that the
+  // near end starts to bulge rather than taper.
+  const T_D = 24, T_Z0 = 2.5, T_ASP = T_CW / T_CH;
+  // Motion: hold face-on for HOLD seconds, then one full turn over SPIN seconds,
+  // eased in and out, and repeat. The playground's continuous tumble (0.9 rad/s)
+  // left the name legible only within ~±20° of face-on — about one second in
+  // seven. Now it reads most of the time and still turns. The first turn comes
+  // at FIRST_SPIN so a visitor sees it early; a small yaw sway keeps the
+  // extrusion visible while the mark holds.
+  const HOLD = 5, SPIN = 2, CYCLE = HOLD + SPIN, FIRST_SPIN = 3;
+  function yawAt(t) {
+    const s = t + (HOLD - FIRST_SPIN);
+    const n = Math.floor(s / CYCLE), p = s - n * CYCLE;
+    let turn = 0;
+    if (p > HOLD) { const u = (p - HOLD) / SPIN; turn = u * u * (3 - 2 * u); }   // smoothstep
+    return (n + turn) * Math.PI * 2 + Math.sin(t * 0.6) * 0.12;
+  }
+  // seconds left in the turn under way at time t (0 while holding)
+  function settle(t) {
+    const p = ((t + HOLD - FIRST_SPIN) % CYCLE + CYCLE) % CYCLE;
+    return p > HOLD ? CYCLE - p : 0;
+  }
   // helpers the ported scene expects
   const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
   const levelFor = (idx, len) => { const p = idx / (len - 1); return p < 0.34 ? 1 : p < 0.72 ? 2 : 3; };
@@ -841,21 +896,21 @@ window.addEventListener('mousemove', e => {
   // from the copy below it. Re-derive the face-on pose (its widest) from spin's
   // own numbers and pull the canvas left by exactly that inset.
   function fitTitle() {
-    const f = Math.min(tCols * 0.8 / wordW, tRows * 0.6 / (7 * YS * T_ASP)) * 24;
-    const half = f * (wordW / 2) / (24 + 2.5);
+    const f = Math.min(tCols * 0.8 / wordW, tRows * 0.6 / (7 * YS * T_ASP)) * T_D;
+    const half = f * (wordW / 2) / (T_D + T_Z0);
     const inset = (tCols / 2 - half) * T_CW;
     titleCanvas.style.marginLeft = (-inset).toFixed(1) + 'px';
   }
 
-  // ---- the playground's `spin` scene, verbatim (index.html sceneSpin) ----
-  // whole word tumbling continuously (classic demoscene logo spin)
+  // ---- ported from the playground's `spin` scene (playground.html sceneSpin);
+  // only the yaw schedule differs ----
   function drawTitle(t) {
     if (!tctx || !tCols) return;
     tctx.clearRect(0, 0, tW, tH);
     tZ.fill(0); tC.fill(255);
     const cols = tCols, rows = tRows, aspect = T_ASP;
-    const D = 24, Z0 = 2.5, len = T_RAMP.length;
-    const yaw = t * 0.9, pit = Math.sin(t * 0.37) * 0.16 - 0.04, rol = Math.sin(t * 0.23) * 0.06;
+    const D = T_D, Z0 = T_Z0, len = T_RAMP.length;
+    const yaw = yawAt(t), pit = Math.sin(t * 0.37) * 0.16 - 0.04, rol = Math.sin(t * 0.23) * 0.06;
     const cyw = Math.cos(yaw), syw = Math.sin(yaw);
     const cpt = Math.cos(pit), spt = Math.sin(pit);
     const crl = Math.cos(rol), srl = Math.sin(rol);
@@ -928,27 +983,50 @@ window.addEventListener('mousemove', e => {
       }
     }
   }
-  // frozen layers rest at t=0, where the wordmark faces the viewer squarely —
-  // a paused spin must not leave the site's name stopped edge-on
-  function render(t) {
-    drawField(fieldStill ? 0 : t);
-    drawTitle(titleStill ? 0 : t);
+  // One accumulated clock drives both layers and stamps the click ripples. It
+  // starts at 0 — every visitor's first frame is the wordmark facing them — a
+  // pause holds the pose instead of jumping ahead on resume, and ripples share
+  // its time base (stamping them with performance.now() made them lag by every
+  // second the page had spent paused or in a background tab).
+  let clock = 0, titleAhead = 0, paused = false;
+  // Frozen layers rest at t=0, where the wordmark faces the viewer squarely —
+  // a paused spin must not leave the site's name stopped edge-on.
+  function render() {
+    drawField(fieldStill ? 0 : clock);
+    drawTitle(titleStill ? 0 : clock + titleAhead);
+  }
+  // When the loop isn't redrawing the field (touch, reduced motion, paused),
+  // pointer moves and scrolls still need a redraw: the cursor bump follows the
+  // pointer and the attenuation mask follows the text. One redraw per frame.
+  let fieldQueued = false;
+  const fieldIdle = () => fieldStill || paused;
+  function queueField() {
+    if (fieldQueued) return;
+    fieldQueued = true;
+    requestAnimationFrame(() => { fieldQueued = false; drawField(fieldStill ? 0 : clock); });
   }
 
   const h1 = document.querySelector('h1');
   if (tctx && h1) h1.classList.add('has-fx');
   resize();
-  render(0);
+  render();
 
-  window.addEventListener('resize', () => { resize(); render(0); });
-  window.addEventListener('scroll', () => { attenDirty = true; }, { passive: true });
+  window.addEventListener('resize', () => { resize(); render(); });
+  window.addEventListener('scroll', () => {
+    attenDirty = true;
+    if (fieldIdle()) queueField();
+  }, { passive: true });
   window.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
-    if (fieldStill) drawField(0);          // frozen field still answers the cursor
+    if (fieldIdle()) queueField();
   }, { passive: true });
-  document.documentElement.addEventListener('mouseleave', () => { mx = my = -1e5; });
+  document.documentElement.addEventListener('mouseleave', () => {
+    mx = my = -1e5;
+    if (fieldIdle()) queueField();
+  });
   window.addEventListener('mousedown', e => {
-    ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() / 1000 });
+    if (fieldIdle()) return;                 // ripples are motion: none while still
+    ripples.push({ x: e.clientX, y: e.clientY, t: clock });
     if (ripples.length > 6) ripples.shift();
   }, { passive: true });
 
@@ -957,7 +1035,6 @@ window.addEventListener('mousemove', e => {
 
   /* Motion runs forever next to body text, so WCAG 2.2.2 wants a control the
    * reader can operate — prefers-reduced-motion alone does not satisfy it. */
-  let paused = false;
   try { paused = localStorage.getItem('alan-motion') === 'off'; } catch (_) {}
   const toggle = document.getElementById('motion');
   function syncToggle() {
@@ -972,21 +1049,23 @@ window.addEventListener('mousemove', e => {
       paused = !paused;
       try { localStorage.setItem('alan-motion', paused ? 'off' : 'on'); } catch (_) {}
       syncToggle();
+      if (paused && !titleStill) {           // caught mid-turn: finish it at once
+        titleAhead += settle(clock + titleAhead);
+        drawTitle(clock + titleAhead);
+      }
     });
   }
 
   const FPS = 24;
-  // An accumulated clock, not the absolute one: the spin therefore starts at
-  // yaw 0 — every visitor's first frame is the wordmark facing them — and
-  // pausing holds the pose instead of jumping ahead on resume.
-  let clock = 0, last = -1e4, prev = -1;
+  let last = -1e4, prev = -1;
   function tick(now) {
     if (document.hidden || now - last < 1000 / FPS) return;
     const dt = prev < 0 ? 0 : Math.min(0.25, (now - prev) / 1000);
     prev = now; last = now;
-    if (!paused) clock += dt;
-    if (!fieldStill) drawField(clock);            // still redraws while paused,
-    if (!titleStill && !paused) drawTitle(clock); // so the cursor reveal lives on
+    if (paused) return;            // hold the frame; input redraws via queueField
+    clock += dt;
+    if (!fieldStill) drawField(clock);
+    if (!titleStill) drawTitle(clock + titleAhead);
   }
   (function loop(now) { tick(now); requestAnimationFrame(loop); })(performance.now());
   setInterval(() => tick(performance.now()), 1000 / FPS);   // fallback where rAF is throttled

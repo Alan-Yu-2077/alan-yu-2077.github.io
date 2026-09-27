@@ -10,22 +10,26 @@ character-rendering layers are original.
 
 | File | What it is |
 | --- | --- |
-| `home.html` | The site. About / Stack / Experience / Projects, plus two canvas ASCII layers. |
-| `resume.html` | One-page A4 résumé. Print to PDF straight from the browser. |
-| `index.html` | Playground: 11 realtime character-rendering scenes. |
+| `index.html` | The site. About / Stack / Experience / Projects / Education, plus two canvas ASCII layers. |
+| `resume.html` | One-page A4 résumé. Print to PDF straight from the browser; stacks to one column on phones. |
+| `alan-yu-resume.pdf` | That page, printed. |
+| `playground.html` | Playground: 11 realtime character-rendering scenes. |
 | `terminal.html` | The same site as a shell — commands, themes, easter eggs. |
+| `assets/` | The Luna screenshot, the favicon, and `og.png`, the 1200×630 link-preview card. |
 | `INSPIRATION.md` | Reference index: 23 ASCII / terminal-aesthetic resources, grouped by use. |
 
-Local preview: `python3 -m http.server 8377` → <http://127.0.0.1:8377/home.html>
+Local preview: `python3 -m http.server 8377` → <http://127.0.0.1:8377/>
 
-## home.html — the two ASCII layers
+Deployed with GitHub Pages from `main`; there is nothing to build.
+
+## index.html — the two ASCII layers
 
 One behind everything, one in place of the `<h1>`. Both run at 24 fps, cost
 roughly 9% of a core together, and stop when the tab goes to the background.
 
 ### 1. Full-screen character field
 
-8×11px cells tile the viewport (~15,000 of them at 1280×800) running a plasma
+8×11px cells tile the viewport (~11,700 of them at 1280×800) running a plasma
 built from two diagonal waves interfering with one row wave. The pointer pushes
 a ripple ahead of it; a click sends out an expanding ring.
 
@@ -45,10 +49,14 @@ tables and each cell does a few lookups instead of four `sin()` calls — about
 (`SUB=4`, `ZS=4` layers, 2.1 units thick) and rendered with a perspective
 projection and a z-buffer into 4×6px character cells.
 
-The motion and camera are the playground's `spin` scene, ported over verbatim:
-three-axis tumble (yaw at 0.9 rad/s ≈ 7s a revolution, plus a pitch and a roll
-wobble on their own periods), camera at `D=24`, shading from depth alone over
-the ramp `' ·:;=+*#%@'`.
+The camera and shading are the playground's `spin` scene — camera at `D=24`,
+shading from depth alone over the ramp `' ·:;=+*#%@'` — but the motion is not.
+`spin` turns continuously at 0.9 rad/s, which leaves the name legible only
+within about ±20° of face-on: roughly one second in every seven, on the one
+element that carries the site's name. Here the mark holds face-on for 5s, then
+makes one full turn over 2s with smoothstep easing, and repeats; the first turn
+comes at 3s so a visitor sees it early. The pitch and roll wobble and a ±7° yaw
+sway keep running through the hold, so the slab still reads as a solid.
 
 Two things that took measuring to get right:
 
@@ -80,20 +88,27 @@ formula and pulls the canvas left by exactly that inset.
   pause under WCAG 2.2.2 — `prefers-reduced-motion` does not satisfy it. The
   choice is remembered in `localStorage`.
 - The clock accumulates rather than reading absolute time, so pausing holds the
-  current pose and resuming does not jump.
+  current pose and resuming does not jump. Click ripples are stamped with the
+  same clock; stamping them with `performance.now()` made them lag by every
+  second the page had spent paused or in a background tab.
 
 | | Effect |
 | --- | --- |
-| Pause button | Freezes in place; the choice is remembered |
-| `home.html?bg=off` | Both layers removed; the heading falls back to plain bold text |
-| `home.html?bg=static` | Frozen at `t=0`; the character field still follows the pointer |
+| Pause button | Both layers stop redrawing (the field still answers the pointer); a wordmark caught mid-turn snaps to the end of that turn. The choice is remembered |
+| `index.html?bg=off` | Both layers removed; the heading falls back to plain bold text |
+| `index.html?bg=static` | Frozen at `t=0`; the character field still follows the pointer |
 
 Automatic degradation: `prefers-reduced-motion` freezes both layers; touch
 devices freeze only the character field (it is pointer-driven, so there is
 nothing to show without one) while **the wordmark keeps turning** — the rotation
-is the design, and phone users should still see it.
+is the design, and phone users should still see it. A frozen field is still
+redrawn on scroll (once per frame), so its attenuation mask keeps following the
+text.
 
-## index.html — playground
+## playground.html — playground
+
+`ALAN·YU` in the header goes back to the site. `playground.html#s=N` opens scene
+N (1-based) and follows the hash when it changes.
 
 | Key / action | |
 | --- | --- |
@@ -125,7 +140,7 @@ Boot self-test and a dot-matrix banner, then a prompt.
 | `theme [dark\|green\|charm\|paper]` | Four themes, persisted to `localStorage` |
 | `crt` | CRT scanlines and glow |
 | `figlet <text>` | 5×7 dot-matrix banner text (A–Z, 0–9) |
-| `play [1-11]` | Jump to a playground scene (`index.html#s=N`) |
+| `play [1-11]` | Jump to a playground scene (`playground.html#s=N`) |
 | `donut` / `matrix` | Full-screen easter eggs (`esc` or click to exit) |
 
 Tab completion for commands and arguments, `↑` `↓` history, `Ctrl+L` to clear,
@@ -134,9 +149,10 @@ click anywhere to focus, block cursor.
 ## Tunables
 
 Character field — `CW`/`CH` (cell), `TIERS` (brightness steps), `FPS`.
-Wordmark — `T_CW`/`T_CH`/`T_FONT` (cell and glyph size), `T_D` (camera
-distance), `SUB`/`ZS`/`DEPTH` (voxel density and slab thickness), `ADV` /
-`SPACE_ADV` (letter and word spacing), and the yaw/pitch/roll rates in
+Wordmark — `T_CW`/`T_CH`/`T_FONT` (cell and glyph size), `T_D`/`T_Z0` (camera
+distance and depth offset), `SUB`/`ZS`/`DEPTH` (voxel density and slab
+thickness), `ADV` / `SPACE_ADV` (letter and word spacing), `HOLD`/`SPIN`/
+`FIRST_SPIN` (the turn schedule, in `yawAt`), and the pitch/roll rates in
 `drawTitle`.
 Playground — `RAMP10` and friends, `FS`/`LH`, `MARQUEE` + `GLYPHS`, `--bg`/`--fg`.
 Terminal — `FS` (fake filesystem), `CMDS` (command registry), `THEMES`, `GLYPHS`.
@@ -144,6 +160,12 @@ Terminal — `FS` (fake filesystem), `CMDS` (command registry), `THEMES`, `GLYPH
 ## Still to do
 
 - [ ] Writing section — engineering notes drawn from Luna's per-version log
-- [ ] Real LinkedIn link (the sidebar icons are still placeholders)
-- [ ] Project thumbnails beyond the one Luna screenshot
-- [ ] Deploy (GitHub Pages / Vercel — it is already static, so there is nothing to build)
+- [ ] LinkedIn link (the placeholder LinkedIn and Instagram icons were removed)
+- [ ] Project thumbnails beyond the one Luna screenshot — agent-kernel's trace viewer first
+- [ ] Self-host Inter, the one request the site makes to another host
+- [x] Deploy — GitHub Pages, from `main`
+
+## License
+
+Code is MIT (see `LICENSE`). The résumé text, the Luna screenshot and the
+preview card are © Alan Yu.
