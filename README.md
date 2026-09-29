@@ -1,28 +1,48 @@
 # ALAN·YU — personal site
 
-A static personal site, hand-written. No framework, no build step, no
-dependencies — four HTML files that open by double-clicking.
+<https://alan-yu-2077.github.io/>
 
-Art direction is ASCII, after [ertdfgcvb.xyz](https://ertdfgcvb.xyz/)
-(Andreas Gysin). The page layout is after
-[brittanychiang.com](https://brittanychiang.com), rebuilt by hand; the
-character-rendering layers are original.
+The page opens with a 24-second film: the blue full stop of ALAN YU● comes to life and
+walks through three pairs of keywords — Notion & Idea, Curiosity & Courage, Exploration &
+Adaptability — and then the system around an LLM (tools, memory, guardrails, the loop).
+It lands back in place: the film's last frame is the page's first screen. Then the page:
+About, Stack, Experience, Projects, Education.
+
+- The site is React + Vite. The film is a Remotion composition that the page plays
+  with `@remotion/player`; its night scene is three.js.
+- Its score ("A6 · Cascade", D minor, half-time 120) is synthesised in Node — no
+  samples — and mastered to −16 LUFS.
+- The film plays on a first visit in a landscape window at least 1024 px wide with
+  WebGL2. It is skipped under `prefers-reduced-motion`, Save-Data or the site's
+  Motion switch, and on a repeat visit in the same session; phones play it on demand
+  in a 16:9 dialog. Skip or Esc end it.
+- Sound is on, but most browsers keep it silent until the first click.
 
 | File | What it is |
 | --- | --- |
-| `index.html` | The site. About / Stack / Experience / Projects / Education, plus two canvas ASCII layers. |
+| `index.html`, `assets/`, `audio/`, `apple-touch-icon.png`, `luna-hero.jpg` | The production build of the site (Vite output; hashed chunks). The source is not in this repository yet. |
 | `resume.html` | One-page A4 résumé. Print to PDF straight from the browser; stacks to one column on phones. |
 | `alan-yu-resume.pdf` | That page, printed. |
-| `playground.html` | Playground: 11 realtime character-rendering scenes. |
-| `terminal.html` | The same site as a shell — commands, themes, easter eggs. |
-| `assets/` | The Luna screenshot, the favicon, and `og.png`, the 1200×630 link-preview card. |
-| `INSPIRATION.md` | Reference index: 23 ASCII / terminal-aesthetic resources, grouped by use. |
+| `playground.html` | The previous site's playground: 11 realtime character-rendering scenes. Kept, no longer linked from the page. |
+| `terminal.html` | The previous site as a shell — commands, themes, easter eggs. Kept, no longer linked. |
+| `assets/favicon.svg`, `assets/apple-touch-icon.png`, `assets/luna-hero.jpg` | The previous site's icons and the Luna screenshot, still used by the pages above. |
+| `INSPIRATION.md` | Reference index for the previous site: 23 ASCII / terminal-aesthetic resources, grouped by use. |
+| `.nojekyll` | GitHub Pages serves the build as it is. |
 
 Local preview: `python3 -m http.server 8377` → <http://127.0.0.1:8377/>
 
-Deployed with GitHub Pages from `main`; there is nothing to build.
+Deployed with GitHub Pages from `main`.
 
-## index.html — the two ASCII layers
+## The previous site (until 2026-09-30)
+
+A static site, hand-written: no framework, no build step, no dependencies. Art
+direction was ASCII, after [ertdfgcvb.xyz](https://ertdfgcvb.xyz/) (Andreas Gysin);
+the page layout was after [brittanychiang.com](https://brittanychiang.com), rebuilt by
+hand; the character-rendering layers were original. Its `index.html` is in the
+history at commit `d6767ba`. The notes below describe that page, and the playground
+and terminal, which are still here.
+
+## The previous index.html — the two ASCII layers
 
 One behind everything, one in place of the `<h1>`. Both run at 24 fps, cost
 roughly 9% of a core together, and stop when the tab goes to the background.
@@ -162,10 +182,12 @@ Terminal — `FS` (fake filesystem), `CMDS` (command registry), `THEMES`, `GLYPH
 - [ ] Writing section — engineering notes drawn from Luna's per-version log
 - [ ] LinkedIn link (the placeholder LinkedIn and Instagram icons were removed)
 - [ ] Project thumbnails beyond the one Luna screenshot — agent-kernel's trace viewer first
-- [ ] Self-host Inter, the one request the site makes to another host
-- [x] Deploy — GitHub Pages, from `main`
+- [ ] Self-host the fonts (Archivo, IBM Plex Mono), the one request the site makes to another host
+- [ ] Put the site's source in this repository
+- [x] Deploy — GitHub Pages, from `main` (the redesign since 2026-09-30)
 
 ## License
 
-Code is MIT (see `LICENSE`). The résumé text, the Luna screenshot and the
-preview card are © Alan Yu.
+Code is MIT (see `LICENSE`). The build bundles third-party libraries under their own
+licenses (React and three.js: MIT; Remotion: the Remotion License). The résumé text,
+the Luna screenshot, the preview card, the film and its score are © Alan Yu.
