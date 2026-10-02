@@ -17,12 +17,12 @@ whichever of About's four principles is pointed at.
 - The film plays on a first visit in a landscape window at least 1024 px wide with
   WebGL2. It is skipped under `prefers-reduced-motion`, Save-Data or the site's
   Motion switch, and on a repeat visit in the same session; phones play it on demand
-  in a 16:9 dialog. Skip or Esc end it.
+  in a 16:9 dialog, as a video file. Skip or Esc end it.
 - Sound is on, but most browsers keep it silent until the first click.
 
 | File | What it is |
 | --- | --- |
-| `index.html`, `assets/`, `audio/`, `landmarks/`, `brand/`, `apple-touch-icon.png`, `luna-hero.jpg` | The production build of the site (Vite output; hashed chunks). The source is not in this repository yet. |
+| `index.html`, `assets/`, `audio/`, `film/`, `landmarks/`, `brand/`, `apple-touch-icon.png`, `luna-hero.jpg` | The production build of the site (Vite output; hashed chunks). `film/` is the intro as a video (720p, 60 fps) for phones. The source is not in this repository yet. |
 | `resume.html` | One-page A4 résumé. Print to PDF straight from the browser; stacks to one column on phones. |
 | `alan-yu-resume.pdf` | That page, printed. |
 | `playground.html` | The previous site's playground: 11 realtime character-rendering scenes. Kept, no longer linked from the page. |
