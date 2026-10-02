@@ -5,8 +5,10 @@
 The page opens with a 24-second film: the blue full stop of ALAN YU● comes to life and
 walks through three pairs of keywords — Notion & Idea, Curiosity & Courage, Exploration &
 Adaptability — and then the system around an LLM (tools, memory, guardrails, the loop).
-It lands back in place: the film's last frame is the page's first screen. Then the page:
-About, Stack, Experience, Projects, Education.
+It lands back in place: the film's last frame is the page's first screen. Then the page —
+About, Stack, Experience, Projects, Education — where the same ball goes on as a guide: it
+stands in each section's scene, jumps to the next one when the scroll stops, and acts out
+whichever of About's four principles is pointed at.
 
 - The site is React + Vite. The film is a Remotion composition that the page plays
   with `@remotion/player`; its night scene is three.js.
@@ -20,7 +22,7 @@ About, Stack, Experience, Projects, Education.
 
 | File | What it is |
 | --- | --- |
-| `index.html`, `assets/`, `audio/`, `apple-touch-icon.png`, `luna-hero.jpg` | The production build of the site (Vite output; hashed chunks). The source is not in this repository yet. |
+| `index.html`, `assets/`, `audio/`, `landmarks/`, `brand/`, `apple-touch-icon.png`, `luna-hero.jpg` | The production build of the site (Vite output; hashed chunks). The source is not in this repository yet. |
 | `resume.html` | One-page A4 résumé. Print to PDF straight from the browser; stacks to one column on phones. |
 | `alan-yu-resume.pdf` | That page, printed. |
 | `playground.html` | The previous site's playground: 11 realtime character-rendering scenes. Kept, no longer linked from the page. |
@@ -189,5 +191,7 @@ Terminal — `FS` (fake filesystem), `CMDS` (command registry), `THEMES`, `GLYPH
 ## License
 
 Code is MIT (see `LICENSE`). The build bundles third-party libraries under their own
-licenses (React and three.js: MIT; Remotion: the Remotion License). The résumé text,
-the Luna screenshot, the preview card, the film and its score are © Alan Yu.
+licenses (React and three.js: MIT; Remotion: the Remotion License). The Eiffel Tower in
+`landmarks/` is "SM - Eiffel Tower" by Scott Marshall (CC BY 3.0, via Poly Pizza),
+preprocessed; the page credits it under Education. The résumé text, the Luna screenshot,
+the preview card, the film and its score are © Alan Yu.
