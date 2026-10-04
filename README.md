@@ -22,7 +22,7 @@ whichever of About's four principles is pointed at.
 
 | File | What it is |
 | --- | --- |
-| `index.html`, `assets/`, `audio/`, `film/`, `landmarks/`, `brand/`, `apple-touch-icon.png`, `luna-hero.jpg` | The production build of the site (Vite output; hashed chunks). `film/` is the intro as a video (720p, 60 fps) for phones. The source is not in this repository yet. |
+| `index.html`, `assets/`, `audio/`, `film/`, `landmarks/`, `brand/`, `apple-touch-icon.png`, `luna-hero.jpg`, `luna-demo.mp4`, `luna-demo.jpg` | The production build of the site (Vite output; hashed chunks). `film/` is the intro as a video (720p, 60 fps) for phones; `luna-demo.mp4` is Luna's demo on the Projects card (muted, looping), `luna-demo.jpg` its poster. The source is not in this repository yet. |
 | `resume.html` | One-page A4 résumé. Print to PDF straight from the browser; stacks to one column on phones. |
 | `alan-yu-resume.pdf` | That page, printed. |
 | `playground.html` | The previous site's playground: 11 realtime character-rendering scenes. Kept, no longer linked from the page. |
@@ -193,5 +193,5 @@ Terminal — `FS` (fake filesystem), `CMDS` (command registry), `THEMES`, `GLYPH
 Code is MIT (see `LICENSE`). The build bundles third-party libraries under their own
 licenses (React and three.js: MIT; Remotion: the Remotion License). The Eiffel Tower in
 `landmarks/` is "SM - Eiffel Tower" by Scott Marshall (CC BY 3.0, via Poly Pizza),
-preprocessed; the page credits it under Education. The résumé text, the Luna screenshot,
+preprocessed; the page credits it under Education. The résumé text, the Luna screenshot and demo,
 the preview card, the film and its score are © Alan Yu.
