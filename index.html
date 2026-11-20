@@ -1,134 +1,43 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Alan Yu — Agent Infrastructure Engineer</title>
-<meta name="description" content="Alan Yu — Agent Infrastructure Engineer. Runtimes, schedulers and guardrails for LLM agents. Seeking a 2026 internship in Paris.">
-<meta name="theme-color" content="#F2EEE6">
-<!-- link previews (LinkedIn, Slack, WeChat…) — og:url and og:image must be absolute. og:image
-     is public/assets/og.png, the v3 Poster (the hero, f1439) at 1920×1008 without the strip,
-     lanczos to 1200×630 (DESIGN-v3 §10); its alt is COPY_V3.ogImageAlt (checks.mjs "og"). -->
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Alan Yu">
-<meta property="og:title" content="Alan Yu — Agent Infrastructure Engineer">
-<meta property="og:description" content="I build AI agents end to end — the turn loop, the memory, the tools and the face. Looking for a 2026 internship in Paris.">
-<meta property="og:url" content="https://alan-yu-2077.github.io/">
-<meta property="og:image" content="https://alan-yu-2077.github.io/assets/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="ALAN YU● — Agent Infrastructure Engineer. Open to work. Line drawing of the system around the model: loop, tools, memory, guardrails.">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<script>
-/* Intro mode, decided before first paint (DESIGN-v2.md §6 "Film mode").
-   film: the Player plays over the DOM hero under a static curtain.
-   static: the final hero at once. frame: ?frame=N (QA), the Player paused at N.
-   The film's night act is WebGL: film mode also needs a WebGL2 context without a major
-   performance caveat. It is probed here only when film mode is otherwise decided (the
-   answer goes to html[data-gl]); static boots probe after first paint (lib/gl.ts).
-   The 1200 ms fallback lives here too, so the curtain drops even if the app never loads,
-   and if the app has not mounted by then, #root's static first screen (#ssr) shows. */
-(function () {
-  var d = document.documentElement, q, mode = 'static';
-  d.setAttribute('data-boot', '');
-  try { q = new URLSearchParams(location.search); } catch (e) { q = null; }
-  function p(k) { return q ? q.get(k) : null; }
-  function get(s, k) { try { return window[s].getItem(k); } catch (e) { return null; } }
-  function gl2() {
-    try {
-      var g = document.createElement('canvas').getContext('webgl2', { failIfMajorPerformanceCaveat: true });
-      if (!g) return false;
-      var x = g.getExtension('WEBGL_lose_context');
-      if (x) x.loseContext();
-      return true;
-    } catch (e) { return false; }
-  }
-  var w = d.clientWidth || window.innerWidth, h = window.innerHeight;
-  var rm = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  /* phones (lib/phone.ts PHONE_MQ): the ball does not travel, and the towers are pictures */
-  if (window.matchMedia && matchMedia('(max-width: 767px), (pointer: coarse) and (max-height: 500px)').matches) d.setAttribute('data-phone', '');
-  var off = get('localStorage', 'alan-motion') === 'off';
-  var sd = !!(navigator.connection && navigator.connection.saveData);
-  /* ?intro=1 forces the film past the session, motion and saveData checks, but not past
-     the viewport (the film is composed for landscape only; phones play it in the 16:9
-     dialog) nor past WebGL2. */
-  var land = w >= 1024 && w / h >= 1.1;
-  /* a deep link (#projects …) lands on its section: no film first (it would flash, then drop) */
-  var deep = /^#(?!top$)./.test(location.hash);
-  if (p('frame') !== null && /^\d+$/.test(p('frame'))) mode = 'frame';
-  else if (land && (p('intro') === '1' || (p('intro') !== 'skip' && !deep && !get('sessionStorage', 'ay.intro.seen') && !rm && !off && !sd))) {
-    var ok = gl2();
-    d.setAttribute('data-gl', ok ? '1' : '0');
-    if (ok) mode = 'film';
-  }
-  d.setAttribute('data-intro', mode);
-  d.setAttribute('data-motion', rm || off ? 'off' : 'on');
-  if (mode === 'film') d.setAttribute('data-curtain', '');
-  var ay = window.__ay = { playing: false, t: 0 };
-  ay.t = setTimeout(function () {
-    /* on a slow link the body may not be parsed yet: check again once it is (the app, if it has
-       mounted by then, has already replaced #ssr) */
-    var nomount = function () { if (document.getElementById('ssr')) d.setAttribute('data-nomount', ''); };
-    if (document.getElementById('ssr') || document.readyState !== 'loading') nomount();
-    else document.addEventListener('DOMContentLoaded', nomount, { once: true });
-    if (d.getAttribute('data-intro') !== 'film' || ay.playing) return;
-    d.setAttribute('data-intro', 'static');
-    d.setAttribute('data-fallback', '');
-    d.removeAttribute('data-curtain');
-    try { window.dispatchEvent(new Event('ay:fallback')); } catch (e) {}
-  }, Math.max(0, 1200 - (window.performance ? performance.now() : 0)));
-})();
-</script>
-<style>html{color:#121110;scrollbar-gutter:stable;background:#f2eee6}body{background:#f2eee6;margin:0}.curtain{display:none}html[data-curtain] .curtain{z-index:40;pointer-events:none;background:#f2eee6;width:100%;height:100vh;display:block;position:absolute;top:0;left:0}.curtain svg{display:block}.ssr{--m0:min(6.25vw, 11.111vh);padding:calc(1.5 * var(--m0)) 16px 64px max(16px, calc(50vw - 6 * var(--m0)));font:400 max(16px, calc(.1833 * var(--m0)))/1.4545 Archivo, system-ui, sans-serif;color:#121110}html[data-boot]:not([data-nomount]) .ssr{clip-path:inset(50%);white-space:nowrap;width:1px;height:1px;padding:0;position:absolute;overflow:hidden}.ssr h1{padding-bottom:calc(.35 * var(--m0));max-width:calc(9 * var(--m0));white-space:nowrap;font:800 max(56px, calc(1.5 * var(--m0)))/.9 Archivo, system-ui, sans-serif;letter-spacing:-.02em;text-transform:uppercase;border-bottom:4px solid #121110;margin:0}.ssr h1:after{content:"";background:#1e3ab8;border-radius:50%;width:.5em;height:.5em;margin-left:.12em;display:inline-block}.ssr p,.ssr h2{margin:0}.ssr .ssr-role{margin-top:calc(.5 * var(--m0));font:700 max(28px, calc(.4 * var(--m0)))/1.2 Archivo, system-ui, sans-serif;letter-spacing:-.02em}.ssr .ssr-tag{max-width:calc(5.75 * var(--m0));margin-top:16px}.ssr .ssr-chip{margin-top:calc(.5 * var(--m0))}.ssr-chip a{min-height:max(44px, calc(.5 * var(--m0)));padding:0 max(16px, calc(.25 * var(--m0)));color:#f2eee6;font:700 max(16px, calc(.2 * var(--m0)))/1 Archivo, system-ui, sans-serif;background:#121110;align-items:center;text-decoration:none;display:inline-flex}.ssr .ssr-avail{margin-top:calc(1.5 * var(--m0));padding-top:calc(.5 * var(--m0));max-width:calc(12 * var(--m0));border-top:4px solid #121110}.ssr-avail h2{letter-spacing:-.02em;text-wrap:balance;font:700 clamp(28px,3vw,48px)/1.15 Archivo,system-ui,sans-serif}.ssr-avail strong{font-weight:800}.ssr-nw{white-space:nowrap}.ssr-sec{margin-top:calc(1 * var(--m0));max-width:calc(9 * var(--m0));border-top:4px solid #121110;padding-top:24px}.ssr-sec h2{letter-spacing:-.02em;margin:0 0 16px;font:800 clamp(28px,3vw,48px)/1 Archivo,system-ui,sans-serif}.ssr-sec h3{margin:16px 0 6px;font:700 20px/1.3 Archivo,system-ui,sans-serif}.ssr-sec p,.ssr-sec dd{margin:0 0 12px}.ssr-sec dt{margin-top:12px;font-weight:700}.ssr-sec dd{margin-left:0}.ssr-sec ol{margin:0;padding:0;list-style:none}.ssr-sec a{color:inherit;text-underline-offset:3px;-webkit-text-decoration:underline #e0321c;text-decoration:underline #e0321c;text-decoration-thickness:2px}.ssr-meta{letter-spacing:.08em;text-transform:uppercase;color:#55504a;font:500 12px/1.5 IBM Plex Mono,ui-monospace,monospace}.ssr .ssr-links{font:500 max(12px, calc(.1167 * var(--m0)))/1 "IBM Plex Mono", ui-monospace, monospace;letter-spacing:.08em;text-transform:uppercase;flex-wrap:wrap;gap:0 32px;margin-top:24px;display:flex}.ssr-links a{color:inherit;text-underline-offset:4px;padding-block:16px;-webkit-text-decoration:underline #e0321c;text-decoration:underline #e0321c;text-decoration-thickness:2px}@media (max-width:1023px){.ssr{--m0:calc((100vw - 32px) / 12);padding:96px 16px 48px}.ssr h1,.ssr .ssr-tag,.ssr .ssr-avail,.ssr .ssr-sec{max-width:none}}</style>
-  <script type="module" crossorigin src="./assets/index-Fi4o70WV.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/react-DB-4Zxce.js">
-  <link rel="modulepreload" crossorigin href="./assets/layout-CIuSB-9s.js">
-  <link rel="stylesheet" crossorigin href="./assets/index-C7cEO9Rz.css">
-</head>
-<body>
-<div class="curtain" aria-hidden="true"><svg><path fill="none" stroke="#DAD3C5" stroke-width="1" shape-rendering="crispEdges"></path></svg></div>
-<script>
-/* The curtain's grid: layout.ts landscape m = min(w/16, h/9), frame centred, and
-   geometry.ts gridPath's pixel snapping, so lifting it onto f0 changes no pixel. */
-(function () {
-  var d = document.documentElement;
-  if (!d.hasAttribute('data-curtain')) return;
-  var w = d.clientWidth || window.innerWidth, h = window.innerHeight;
-  var m = Math.min(w / 16, h / 9), x0 = (w - 16 * m) / 2, s = '', x, y;
-  for (x = x0 - Math.floor(x0 / m) * m; x < w - 0.01; x += m) if (x > 0.01) s += 'M' + (Math.round(x) + 0.5) + ' 0V' + h;
-  for (y = 0; y < h - 0.01; y += m) if (y > 0.01) s += 'M0 ' + (Math.round(y) + 0.5) + 'H' + w;
-  var c = document.querySelector('.curtain'), svg = c.firstChild;
-  c.style.height = h + 'px';
-  svg.setAttribute('width', w);
-  svg.setAttribute('height', h);
-  svg.firstChild.setAttribute('d', s);
-})();
-</script>
-<div id="root"><div class="ssr" id="ssr">
-    <h1>Alan Yu</h1>
-    <p class="ssr-role">Agent Infrastructure Engineer</p>
-    <p class="ssr-tag">I build AI agents end to end, from the turn loop to long-term memory.</p>
-    <p class="ssr-tag ssr-tag2">I'm still an explorer. I learn by building: in a field that resets every few months, it's how I keep pace with the frontier, adapt fast, and find what's worth keeping.</p>
-    <p class="ssr-chip"><a href="#available">Open to work</a></p>
-    <section class="ssr-sec" id="about" aria-labelledby="about-h"><h2 id="about-h">About</h2><p>My focus is the harness around an LLM.</p><p>How I work:</p><p><strong>Own the stack.</strong> I've built an agent's core layers by hand — the turn loop, provider protocols (Anthropic Messages, OpenAI-compatible), streaming, prompt caching, context assembly and tool execution — so I know what each costs and how it fails.</p><p><strong>Codify the workflow.</strong> For each product, I put coding agents under a strict, written workflow — spec, review, test, ship — and every version carries <a href="https://github.com/Alan-Yu-2077/Luna/blob/main/docs/history/DEVELOPMENT.md">a note on what changed and why</a>, including the ones that were wrong.</p><p><strong>Make the product observable.</strong> Every agent I ship traces each turn end to end — model calls, tool calls, latency — so a behaviour change is judged on evidence: a test that pins it, or a before/after from the traces.</p><p><strong>Keep long-term memory stable.</strong> I've explored what keeps an agent's memory reliable over months — layered injection, with each kind of memory entering the context at its own tier, and tuning the scoring parameters of RAG recall so the right memories surface.</p></section>
-    <section class="ssr-sec" id="stack" aria-labelledby="stack-h"><h2 id="stack-h">Stack</h2><dl><dt>Agent runtime &amp; scheduling</dt><dd><a href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/turn/runTurn.ts#L187-L198">State-machine turn loops</a> with bounded tool iteration · <a href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/tools/dispatcher.ts#L29-L64">three-state concurrency</a> (safe-parallel / session-serial / global-serial) · <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/memory/sessionStore.ts#L24-L42">conversation state persisted to SQLite</a> and rebuilt on restart · proactive behaviour gated by <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/proactive/cadence.ts#L68-L98">deterministic rails</a> — quiet hours, idle floor, cooldown, quota · <a href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/turn/runTurn.ts#L259-L294">full-turn tracing</a> with a <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/trace/viewer.ts#L14-L36">local timeline viewer</a>.</dd><dt>Tool execution &amp; isolation</dt><dd><a href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/tools/dispatcher.ts#L99-L103">Zod validation</a> of every tool call's input and output · <a href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/server/src/tools/dispatcher.ts#L112-L147">per-tool timeouts and abort signals</a>, and one ok/err <a href="https://github.com/Alan-Yu-2077/agent-kernel/blob/cd2d3faf1cf49ec3cd35aaa9ae89f02bac8ade6d/packages/protocol/src/tools.ts#L15-L29"><code>ToolResult</code></a> · path guards that <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/tools/workspace.ts#L243-L286">canonicalize before every check</a>, and an <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/tools/workspace.ts#L141-L172">evaluator firewall</a> over the files that gate the agent · <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/tools/web/safeFetch.ts#L315-L356">SSRF-guarded outbound fetch</a>, pinned to the checked IP · <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/main.ts#L313-L322">origin-checked transport</a>, loopback by default.</dd><dt>Production engineering</dt><dd>Strongly-typed full-stack TypeScript · <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/protocol/src/events.ts#L235-L251">one Zod-typed wire contract</a> shared by server and client, so an unmirrored change is <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/web/src/controller.ts#L284-L296">a compile error</a> · a <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/desktop/src/supervisor.ts#L117-L146">supervisor</a> that restarts a crashed backend · every risky feature behind a default-off flag before its default flips · <a href="https://github.com/Alan-Yu-2077/Luna/blob/main/docs/history/DEVELOPMENT.md">a written rationale per release</a>.</dd></dl><p class="ssr-meta">Going deeper on</p><p>multi-agent scheduling under contention, stronger isolation boundaries for tool execution (MicroVM and Wasm runtimes), distributed scheduling across agent workers, and durable execution / workflow-replay engines. Direction, not shipped work — the isolation above is in-process.</p><p class="ssr-meta">Languages &amp; runtime</p><p>TypeScript (strict) · Python · C++ · Go · Bun · Node · Electron · SQLite · WebSocket · MCP · Anthropic &amp; OpenAI-compatible providers · Git · Docker</p></section>
-    <section class="ssr-sec" id="experience" aria-labelledby="experience-h"><h2 id="experience-h">Experience</h2><ol><li><p class="ssr-meta">Jun 2026 — Present</p><h3><a href="https://github.com/moeru-ai/airi">Open-source contributor · airi (~50k★), velin</a></h3><p>airi is a desktop AI companion much like Luna. Users kept asking why the character couldn't look things up online, so I lifted the web layer out of Luna, reshaped it for airi's stage-ui, and <a href="https://github.com/moeru-ai/airi/pull/2066">shipped it</a>. Also fixed a <a href="https://github.com/moeru-ai/airi/pull/2006">background-process leak</a> in their computer-use MCP, and landed <a href="https://github.com/moeru-ai/velin/pull/49">prompt-as-tool</a> in velin.</p><p class="ssr-meta">Open source · TypeScript · Vue · MCP</p></li><li><p class="ssr-meta">2025</p><h3><a href="https://www.bytedance.com/">Campus Partner, Lead · ByteDance</a></h3><p>Ran hackathons and campus vibe-coding workshops at Chang'an University — teaching students to ship real things with an LLM in the loop. Named Outstanding Campus Partner of the Year.</p><p class="ssr-meta">Hackathons · Workshops · Developer community</p></li><li><p class="ssr-meta">Oct 2024 — Feb 2025</p><h3>Technical Intern · E-class, Chang'an University</h3><p>Selected 1 of 12 — <a href="https://github.com/Alan-Yu-2077/CHU_E-class_interviewtask">the interview tasks are still up</a>. Data collection, cleaning and ingestion for AI Counselor, a campus RAG assistant. Working next to the team's engineers is where I first saw how an agent is actually put together — the starting point for everything under Projects.</p><p class="ssr-meta">Python · Selenium · RAG · Data pipelines</p></li></ol><p><a href="https://alan-yu-2077.github.io/resume.html">View Full Résumé</a> · <a href="https://alan-yu-2077.github.io/alan-yu-resume.pdf">PDF</a></p></section>
-    <section class="ssr-sec" id="projects" aria-labelledby="projects-h"><h2 id="projects-h">Projects</h2><article><h3><a href="https://github.com/Alan-Yu-2077/Luna">Luna — a desktop AI companion</a></h3><p>She remembers across months, opens conversations herself, and has a face. Three layers of memory over one SQLite file with <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/memory/recall/recall.ts#L249-L275">hybrid recall</a>, and a nightly <a href="https://github.com/Alan-Yu-2077/Luna/blob/4ab5235f25b3ef98b54e8bff35d204c3674e8af6/packages/server/src/dream/cycle.ts#L66-L98">dream cycle</a> that distills the day into facts, a diary, and skills she keeps for herself. Live2D avatar, phoneme lip-sync, and a cloned voice you can set up without ever opening a terminal — all behind a single Zod-typed WebSocket contract.</p><p class="ssr-meta">TypeScript · Bun · Electron · SQLite · Live2D · Anthropic API</p><p><a href="https://alan-yu-2077.github.io/Luna/">Luna TV — live demo ↗</a> · <a href="https://github.com/Alan-Yu-2077/Luna">Source ↗</a></p></article><article><h3><a href="https://github.com/Alan-Yu-2077/agent-kernel">agent-kernel</a></h3><p>What's left of Luna once you take her personality out: a StateGraph turn loop, a Zod-first tool registry with three-state concurrency, a provider abstraction, and full-turn tracing you can read in a local viewer. Add tools, swap the system prompt, and it's a different agent.</p><p class="ssr-meta">TypeScript · Zod · SQLite</p></article></section>
-    <section class="ssr-sec" id="education" aria-labelledby="education-h"><h2 id="education-h">Education</h2><ol><li><p class="ssr-meta">2023 — 2026</p><h3>BEng Artificial Intelligence · Chang'an University</h3><p>The first three years of the 3+1, in Xi'an. Everything under Projects was built alongside coursework, on my own time.</p><p class="ssr-meta">Xi'an</p></li><li><p class="ssr-meta">2026 — Present</p><h3><a href="https://www.epita.fr/">BSc Computer Science · EPITA, Paris</a></h3><p>The Paris year of a Sino-French 3+1 joint programme. I'm in Paris now, looking for internships across France and the EU.</p><p class="ssr-meta">Paris · Available</p></li></ol><p class="ssr-meta">Eiffel Tower model: <a href="https://poly.pizza/m/aIpJchqtRTg">“SM - Eiffel Tower”</a> by Scott Marshall, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>, via Poly Pizza</p></section>
-    <section class="ssr-avail" id="available" aria-labelledby="ssr-avail-h">
-      <h2 id="ssr-avail-h">Looking for a 2026 internship in Paris · <span class="ssr-nw">English-speaking team</span> · <strong class="ssr-nw" lang="fr">Convention de stage</strong> provided</h2>
-      <p class="ssr-links">
-        <a href="mailto:yualan077@gmail.com">Email</a>
-        <a href="https://github.com/Alan-Yu-2077" target="_blank" rel="noreferrer">GitHub<span aria-hidden="true"> ↗</span></a>
-        <a href="https://alan-yu-2077.github.io/resume.html" target="_blank" rel="noreferrer">Résumé<span aria-hidden="true"> ↗</span></a>
-        <a href="https://alan-yu-2077.github.io/alan-yu-resume.pdf" target="_blank" rel="noreferrer">PDF<span aria-hidden="true"> ↗</span></a>
-      </p>
-    </section>
-  </div></div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f4ef" />
+    <meta name="description" content="Alan Yu — Software Engineer / AI Agent Engineer. A résumé you scroll through: a 3D tour of my desk." />
+    <title>Alan Yu · Software Engineer / AI Agent Engineer · Résumé</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Alan Yu · Software Engineer / AI Agent Engineer" />
+    <meta property="og:description" content="A résumé you scroll through: a 3D tour of my desk." />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <script type="module" crossorigin src="./assets/index-B0muNddA.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-wSMKAIsj.css">
+  </head>
+  <body>
+    <!-- 3D 舞台：固定在内容后面 -->
+    <canvas id="stage" aria-hidden="true"></canvas>
+
+    <!-- 顶部栏：名字 + 章节导航 + Quick résumé -->
+    <header id="topbar"></header>
+    <div id="progress" aria-hidden="true"><i></i></div>
+
+    <!-- 开场片头字幕：远景期间显示姓名和职位（内容由 dom.js 填充；正文里有同样的信息，所以对读屏隐藏） -->
+    <div id="opening" aria-hidden="true"></div>
+
+    <!-- 滚动叙事内容（由 src/ui/dom.js 根据 content.js 生成） -->
+    <main id="story"></main>
+
+    <!-- Quick résumé：传统一页式排版，可打印 -->
+    <div id="sheet" role="dialog" aria-modal="true" aria-label="Quick résumé" hidden></div>
+
+    <div id="hint" aria-hidden="true">Psst — click, drag or type: the desk plays along ↗</div>
+    <div id="tip" aria-hidden="true"></div>
+
+    <!-- 彩蛋揭晓：全屏大字（内容由 ui.js 根据 content.js 填充） -->
+    <div id="egg" role="status" aria-live="polite" hidden></div>
+
+    <noscript>
+      <p style="padding: 24px; font-family: sans-serif">This page needs JavaScript to display the résumé.</p>
+    </noscript>
+  </body>
 </html>
